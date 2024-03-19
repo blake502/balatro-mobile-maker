@@ -4,6 +4,7 @@
 This goal of this script is to allow *Balatro* fans to play *Balatro* on their mobile devices before the official release. This script provides a **NON-PIRACY** avenue for players to do so, by converting their *Steam* version of *Balatro* to an APK format.
 
 ## Quick Start Guide
+Please review the **Notes** section before you begin.
  - Download [**balatro-apk-maker.bat**](https://smudge.codes/files/balatro-apk-maker.bat) (Right-click, "Save Page As...")
  - Run **balatro-apk-maker.bat**.
  - When *Notepad* appears, modify the file according to the **Code Changes** section below.
