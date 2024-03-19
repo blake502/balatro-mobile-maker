@@ -11,7 +11,7 @@ This goal of this script is to allow *Balatro* fans to play *Balatro* on their m
  - Copy the resulting **balatro.apk** to your Android device.
 
 ## Code Changes
-When *Notepad* appears during this script, you must remove the line that begins with `loadstring("` ([approximately line 43](https://youtu.be/CfUHN2HJbj8?si=ASQsLVJb1fxNeFP0&t=234))
+When *Notepad* appears during this script, you must add two minus symbols to the line that begins with `loadstring("` ([approximately line 43](https://youtu.be/CfUHN2HJbj8?si=ASQsLVJb1fxNeFP0&t=234)) such that it begins with `--loadstring("` instead.
 Under that line, you must paste in this code:
 ```
 if love.system.getOS() == 'Android' then
