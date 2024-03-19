@@ -5,7 +5,7 @@ This goal of this script is to allow *Balatro* fans to play *Balatro* on their m
 
 ## Quick Start Guide
  - Download [**balatro-apk-maker.bat**](https://smudge.codes/files/balatro-apk-maker.bat) (Right-click, "Save Page As...")
- - Run **balatro-apk-maker.bat** as admin.
+ - Run **balatro-apk-maker.bat**.
  - When *Notepad* appears, modify the file according to the **Code Changes** section below.
  - Save the file, then close *Notepad*.
  - Copy the resulting **balatro.apk** to your Android device.
