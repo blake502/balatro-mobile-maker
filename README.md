@@ -1,7 +1,7 @@
 # Balatro APK Maker
 
 ## Quick Start Guide
- - Download **balatro-apk-maker.bat**.
+ - Download [**balatro-apk-maker.bat**](https://smudge.codes/files/balatro-apk-maker.bat) (Right-click, "Save Page As...")
  - Run **balatro-apk-maker.bat** as admin.
  - When *Notepad* appears, modify the file according to the **Code Changes** section below.
  - Save the file, then close *Notepad*.
@@ -22,8 +22,8 @@ Save the file with *Notepad*.
 
 ## Notes
  - This script assumes that **Balatro.exe** is located in the default *Steam* directory (`C:\Program Files (x86)\Steam\steamapps\common\Balatro\Balatro.exe`). If it is not, simply copy your **Balatro.exe** to the same folder as **balatro-apk-maker.bat**
- - This script will automatically download and install 7-Zip
- - This script will automatically download and install Java
+ - This script will automatically download and install [7-Zip](https://www.7-zip.org/)
+ - This script will automatically download and install [Java](https://www.java.com/en/download/)
  - This script will automatically download [APK Tool](https://apktool.org/)
  - This script will automatically download [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer/)
  - This script will automatically download [love-11.5-android-embed.apk](https://github.com/love2d/love-android/)
