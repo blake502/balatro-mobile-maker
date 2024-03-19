@@ -1,0 +1,30 @@
+# Balatro APK Maker
+
+## Quick Start Guide
+ - Download **balatro-apk-maker.bat**.
+ - Run **balatro-apk-maker.bat** as admin.
+ - When *Notepad* appears, modify the file according to the **Code Changes** section below.
+ - Save the file, then close *Notepad*.
+ - Copy the resulting **balatro.apk** to your Android device.
+
+## Code Changes
+When *Notepad* appears during this script, you must remove the line that begins with `loadstring("` ([approximately line 43](https://youtu.be/CfUHN2HJbj8?si=ASQsLVJb1fxNeFP0&t=234))
+Under that line, you must paste in this code:
+```
+if love.system.getOS() == 'Android' then
+    self.F_DISCORD = true
+    self.F_SOUND_THREAD = true
+    self.F_VIDEO_SETTINGS = false
+    self.F_NO_ACHIEVEMENTS = true
+end
+```
+Save the file with *Notepad*.
+
+## Notes
+ - This script assumes that **Balatro.exe** is located in the default *Steam* directory (`C:\Program Files (x86)\Steam\steamapps\common\Balatro\Balatro.exe`). If it is not, simply copy your **Balatro.exe** to the same folder as **balatro-apk-maker.bat**
+ - This script will automatically download and install 7-Zip
+ - This script will automatically download and install Java
+ - This script will automatically download [APK Tool](https://apktool.org/)
+ - This script will automatically download [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer/)
+ - This script will automatically download [love-11.5-android-embed.apk](https://github.com/love2d/love-android/)
+ - This script will automatically download [Balatro-APK-Patch](http://smudge.codes/files/Balatro-APK-Patch.zip)
