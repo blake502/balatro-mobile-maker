@@ -12,14 +12,17 @@ This goal of this script is to allow *Balatro* fans to play *Balatro* on their m
 
 ## Code Changes
 When *Notepad* appears during this script, you must add two minus symbols to the line that begins with `loadstring("` ([approximately line 43](https://youtu.be/CfUHN2HJbj8?si=ASQsLVJb1fxNeFP0&t=234)) such that it begins with `--loadstring("` instead.
-Under that line, you must paste in this code:
+
+Under that line, directly above the line that begins with `if love.system.getOS() == 'Windows' then`, you must paste in this code:
 ```
+
 if love.system.getOS() == 'Android' then
     self.F_DISCORD = true
     self.F_SOUND_THREAD = true
     self.F_VIDEO_SETTINGS = false
     self.F_NO_ACHIEVEMENTS = true
 end
+
 ```
 Save the file with *Notepad*.
 
