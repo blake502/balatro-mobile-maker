@@ -30,3 +30,6 @@ Changes the save path from `data/data/com.unofficial.balatro/files` to `sdcard/A
 
  ## License
  [7-Zip](www.7-zip.org) is licensed under the GNU LGPL license.
+ This project uses [APKTool](https://github.com/iBotPeaches/Apktool/blob/master/LICENSE.md)
+ This project uses [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer/blob/main/LICENSE)
+ This project uses [LOVE](https://github.com/love2d/love/blob/main/license.txt)
