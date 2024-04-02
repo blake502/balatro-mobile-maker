@@ -4,7 +4,7 @@ This goal of this script is to allow *Balatro* fans to play *Balatro* on their m
 
 ## Quick Start Guide
 Please review the **Notes** section before you begin.
- - Download or compile [**balatro-apk-maker.exe**](https://github.com/blake502/balatro-apk-maker/releases/download/beta-0.1/balatro-apk-maker-beta-0.1.exe).
+ - Download or compile [**balatro-apk-maker.exe**](https://github.com/blake502/balatro-apk-maker/releases/download/beta-0.2/balatro-apk-maker-beta-0.2.exe).
  - Run **balatro-apk-maker.exe**.
  - Follow the prompts to apply optional patches. If you're unsure, always select "Y".
  - Copy the resulting **balatro.apk** to your Android device.
