@@ -101,7 +101,10 @@ namespace Balatro_APK_Maker
                 applyPatch("main.lua", "local os = love.system.getOS()", "    local os = love.system.getOS()\n    love.window.setMode(2, 1)");
 
             if (askQuestion("Would you like to apply the CRT shader disable patch?"))
+            {
                 applyPatch("globals.lua", "crt = ", "            crt = 0,");
+                applyPatch("game.lua", "G.SHADERS['CRT'])", "");
+            }
 
             if (askQuestion("Would you like to apply the accessible saves patch?"))
                 applyPatch("conf.lua", "t.window.width = 0", "    t.window.width = 0\n    t.externalstorage = true");
