@@ -29,7 +29,7 @@ Changes the save path from `data/data/com.unofficial.balatro/files` to `sdcard/A
  - This script will automatically download [Balatro-APK-Patch](http://smudge.codes/files/Balatro-APK-Patch.zip)
 
  ## License
- [7-Zip](www.7-zip.org) is licensed under the GNU LGPL license.
+ [7-Zip](https://www.7-zip.org) is licensed under the GNU LGPL license.
  
  This project uses [APKTool](https://github.com/iBotPeaches/Apktool/blob/master/LICENSE.md)
  
