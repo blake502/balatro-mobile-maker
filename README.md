@@ -20,7 +20,7 @@ Sets the CRT Shader to 0% by default (Recommended for some devices)
 Changes the save path from `data/data/com.unofficial.balatro/files` to `sdcard/Android/data/com.unofficial.balatro/files`. Accessing this location with the lastest versions of Android is still tricky, but it should make it easier for root users. (Recommended for most cases)
 
 ## Notes
- - This script assumes that **Balatro.exe** is located in the default *Steam* directory (`C:\Program Files (x86)\Steam\steamapps\common\Balatro\Balatro.exe`). If it is not, simply copy your **Balatro.exe** to the same folder as **balatro-apk-maker.bat**
+ - This script assumes that **Balatro.exe** is located in the default *Steam* directory (`C:\Program Files (x86)\Steam\steamapps\common\Balatro\Balatro.exe`). If it is not, simply copy your **Balatro.exe** to the same folder as **balatro-apk-maker.exe**
  - This script can automatically download and install [Java](https://www.java.com/en/download/)
  - This script will automatically download [7-Zip](https://www.7-zip.org/)
  - This script will automatically download [APK Tool](https://apktool.org/)
