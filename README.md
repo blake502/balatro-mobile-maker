@@ -11,11 +11,11 @@ Please review the **Notes** section before you begin.
 
  ## Optional Patches
 - **FPS Cap**
-Caps FPS to a desired number between 15 and 120 (Recommended for battery performance)
+Caps FPS to a desired number (Or to the device's native refresh rate-- recommended for battery performance)
 - **Landscape Orientation**
 Locks the game to landscape orientation (Recommended, since portrait orientation does not behave very well)
 - **CRT Shader Disable**
-Sets the CRT Shader to 0% by default (Recommended for some devices)
+Disables the CRT Shader (Recommended for Pixel and some other devices)
 - **Accessible Saves**
 Changes the save path from `data/data/com.unofficial.balatro/files` to `sdcard/Android/data/com.unofficial.balatro/files`. Accessing this location with the lastest versions of Android is still tricky, but it should make it easier for root users. (Recommended for most cases)
 
