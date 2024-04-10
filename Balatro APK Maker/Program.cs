@@ -121,6 +121,9 @@ namespace Balatro_APK_Maker
 
             if (askQuestion("Would you like to apply the accessible saves patch?"))
                 applyPatch("conf.lua", "t.window.width = 0", "    t.window.width = 0\n    t.externalstorage = true");
+            
+            if (askQuestion("Would you like to apply the screen keyboard patch?"))
+                applyPatch("functions/button_callbacks.lua", "G.CONTROLLER.text_input_hook == e and G.CONTROLLER.HID.controller", "  if G.CONTROLLER.text_input_hook == e and (G.CONTROLLER.HID.controller or G.CONTROLLER.HID.touch) then");
         }
 
         //Attempts to download a file if it does not exist.
