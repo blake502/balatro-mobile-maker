@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Threading;
 
 namespace Balatro_APK_Maker
@@ -28,8 +29,10 @@ namespace Balatro_APK_Maker
 
             //Search for the line to replace
             bool success = false;
-            for (int i = 0; i < loadedFile.Length; i++) {
-                if (loadedFile[i].IndexOf(lineContains) != -1) {
+            for (int i = 0; i < loadedFile.Length; i++)
+            {
+                if (loadedFile[i].IndexOf(lineContains) != -1)
+                {
                     //Replace the line
                     loadedFile[i] = replaceWith;
                     success = true;
@@ -37,9 +40,12 @@ namespace Balatro_APK_Maker
                 }
             }
 
-            if (!success) {
+            if (!success)
+            {
                 log("Unable to find patch location...");
-            } else  {
+            }
+            else 
+            {
                 //If it is found, write the file.
                 log("Successfully applied patch...");
                 File.WriteAllLines("Balatro\\" + file, loadedFile);
@@ -64,30 +70,38 @@ namespace Balatro_APK_Maker
     end");
 
             //Ask whether they want the FPS cap patch
-            if (askQuestion("Would you like to apply the FPS cap patch?")) {
+            if (askQuestion("Would you like to apply the FPS cap patch?"))
+            {
                 int fps = -1;
                 do {
                     log("Please enter your desired FPS cap (or leave blank to set to device refresh rate):");
                     string input = Console.ReadLine().ToLower();
 
-                    if (String.IsNullOrWhiteSpace(input)) {
+                    if (String.IsNullOrWhiteSpace(input))
+                    {
                         //Set to refresh rate if blank
                         fps = -2;
                         break;
                     }
 
-                    try {
+                    try
+                    {
                         //Set to specific value
                         fps = Convert.ToInt32(input);
-                    } catch {
+                    }
+                    catch
+                    {
                         continue;
                     }
                 } while (fps <= 0 || fps > 999);
 
-                if (fps > 0) {
+                if (fps > 0)
+                {
                     //Apply the patch using the given FPS
                     applyPatch("main.lua", "G.FPS_CAP = G.FPS_CAP or", "        G.FPS_CAP = " + fps.ToString());
-                } else {
+                }
+                else
+                {
                     //Apply the patch using the display refresh rate
                     applyPatch("main.lua", "G.FPS_CAP = G.FPS_CAP or", @"        p_ww, p_hh, p_wflags = love.window.getMode()
         G.FPS_CAP = p_wflags['refreshrate']");
@@ -99,7 +113,8 @@ namespace Balatro_APK_Maker
             if (askQuestion("Would you like to apply the landscape orientation patch?"))
                 applyPatch("main.lua", "local os = love.system.getOS()", "    local os = love.system.getOS()\n    love.window.setMode(2, 1)");
 
-            if (askQuestion("Would you like to apply the CRT shader disable patch?")) {
+            if (askQuestion("Would you like to apply the CRT shader disable patch? (Required for Pixel and some other devices!)"))
+            {
                 applyPatch("globals.lua", "crt = ", "            crt = 0,");
                 applyPatch("game.lua", "G.SHADERS['CRT'])", "");
             }
@@ -113,11 +128,13 @@ namespace Balatro_APK_Maker
         static void tryDownloadFile(string name, string link, string fileName)
         {
             //If the file does not already exist
-            if (!File.Exists(fileName)) {
-                //Call powershell to download it
-                //Yes, yes, I know there are better, faster ways to do this. But this is easy.
+            if (!File.Exists(fileName))
+            {
                 log("Downloading " + name + "...");
-                commandLine("powershell -Command \"Invoke-WebRequest " + link + " -OutFile " + fileName + "\"");
+                using (var client = new WebClient())
+                {
+                    client.DownloadFile(link, fileName);
+                }
 
                 //Make sure it exists
                 if (File.Exists(fileName))
@@ -128,7 +145,9 @@ namespace Balatro_APK_Maker
                     log("Failed to download " + name + "!");
                     exit();
                 }
-            } else {
+            }
+            else
+            {
                 //File already exists
                 log(fileName + " already exists.");
             }
@@ -174,13 +193,17 @@ namespace Balatro_APK_Maker
 
             //Check for Java
             log("Checking for Java...");
-            if (commandLine(javaCommand).ExitCode == 0) {
+            if (commandLine(javaCommand).ExitCode == 0)
+            {
                 log("Java found.");
-            } else {
+            }
+            else
+            {
                 log("Java not found, please install Java!");
 
                 //Prompt user to automatically download install Java
-                if (askQuestion("Would you like to automatically download and install Java?")) {
+                if (askQuestion("Would you like to automatically download and install Java?"))
+                {
                     //Download
                     tryDownloadFile("Java", jre8installerLink, "java-installer.exe");
                     //Install
@@ -188,12 +211,15 @@ namespace Balatro_APK_Maker
                     commandLine("java-installer.exe /s");
 
                     //Check again for Java
-                    if (commandLine(javaCommand).ExitCode != 0) {
+                    if (commandLine(javaCommand).ExitCode != 0)
+                    {
                         //Critical error
                         log("Java still not detected!");
                         exit();
                     }
-                } else {
+                }
+                else
+                {
                     //User does not wish to automatically download and install Java
                     //Take them to the download link instead. Halt program
                     commandLine(javaDownloadCommand);
@@ -220,24 +246,29 @@ namespace Balatro_APK_Maker
 
 
             bool exeProvided = false;
-            if (!File.Exists("Balatro.exe")) {
+            if (!File.Exists("Balatro.exe"))
+            {
                 //Attempt to copy Balatro.exe from Steam directory
                 log("Copying Balatro.exe from Steam directory...");
                 commandLine("xcopy \"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Balatro\\Balatro.exe\" \"Balatro.exe\" /E /H /Y /V /-I");
 
-                if (!File.Exists("Balatro.exe")) {
+                if (!File.Exists("Balatro.exe"))
+                {
                     //Balatro.exe still not found. Critical error.
                     log("Could not find Balatro.exe! Please place it in this folder, then try again!");
                     exit();
                 }
-            } else {
+            }
+            else
+            {
                 //User provided Balatro.exe
                 exeProvided = true;
                 log("Balatro.exe already exists.");
             }
 
             log("Extracting Balatro.exe");
-            if (Directory.Exists("Balatro")) {
+            if (Directory.Exists("Balatro"))
+            {
                 //Delete the Balatro folder if it already exists
                 log("Balatro directory already exists! Deleting Balatro directory...");
                 commandLine("rmdir Balatro\\ /S /Q");
@@ -247,13 +278,15 @@ namespace Balatro_APK_Maker
             commandLine("7za x Balatro.exe -oBalatro");
 
             //Check for failure
-            if (!Directory.Exists("Balatro")) {
+            if (!Directory.Exists("Balatro"))
+            {
                 log("Failed to extract Balatro.exe!");
                 exit();
             }
 
             log("Unpacking Love2D APK with APK Tool...");
-            if (Directory.Exists("balatro-apk")) {
+            if (Directory.Exists("balatro-apk"))
+            {
                 //Delete the balatro-apk folder if it already exists
                 log("balatro-apk directory already exists! Deleting balatro-apk directory...");
                 commandLine("rmdir balatro-apk\\ /S /Q");
@@ -263,13 +296,15 @@ namespace Balatro_APK_Maker
             commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
 
             //Check for failure
-            if (!Directory.Exists("balatro-apk")) {
+            if (!Directory.Exists("balatro-apk"))
+            {
                 log("Failed to unpack Love2D APK with APK Tool!");
                 exit();
             }
 
             log("Extracting patch zip...");
-            if (Directory.Exists("Balatro-APK-Patch")) {
+            if (Directory.Exists("Balatro-APK-Patch"))
+            {
                 log("Balatro-APK-Patch directory already exists! Deleting Balatro-APK-Patch directory...");
                 commandLine("rmdir Balatro-APK-Patch\\ /S /Q");
             }
@@ -277,7 +312,8 @@ namespace Balatro_APK_Maker
             //Extract Balatro-APK-Patch
             commandLine("7za.exe  x Balatro-APK-Patch.zip -oBalatro-APK-Patch");
 
-            if (!Directory.Exists("Balatro-APK-Patch")) {
+            if (!Directory.Exists("Balatro-APK-Patch"))
+            {
                 log("Failed to extract Balatro-APK-Patch");
                 exit();
             }
@@ -291,7 +327,8 @@ namespace Balatro_APK_Maker
             log("Packing Balatro folder...");
             commandLine("\"cd Balatro && ..\\7za.exe a balatro.zip && cd ..\"");
 
-            if (!File.Exists("Balatro\\balatro.zip")) {
+            if (!File.Exists("Balatro\\balatro.zip"))
+            {
                 log("Failed to pack Balatro folder!");
                 exit();
             }
@@ -302,7 +339,8 @@ namespace Balatro_APK_Maker
             log("Repacking APK...");
             commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" b -o balatro.apk balatro-apk");
 
-            if (!File.Exists("balatro.apk")) {
+            if (!File.Exists("balatro.apk"))
+            {
                 log("Failed to pack Balatro apk!");
                 exit();
             }
@@ -310,12 +348,14 @@ namespace Balatro_APK_Maker
             log("Signing APK...");
             commandLine("java -jar uber-apk-signer.jar -a balatro.apk");
 
-            if (!File.Exists("balatro-aligned-debugSigned.apk")) {
+            if (!File.Exists("balatro-aligned-debugSigned.apk"))
+            {
                 log("Failed to sign APK!");
                 exit();
             }
 
-            if (cleanUpTools) {
+            if (cleanUpTools)
+            {
                 log("Deleting tools...");
 
                 commandLine("del java-installer.exe");
@@ -326,8 +366,10 @@ namespace Balatro_APK_Maker
                 commandLine("del uber-apk-signer.jar");
             }
 
-            if (cleanUpFiles) {
-                if (!exeProvided) {
+            if (cleanUpFiles)
+            {
+                if (!exeProvided)
+                {
                     log("Deleting Balatro.exe");
                     commandLine("del Balatro.exe");
                 }
@@ -339,7 +381,9 @@ namespace Balatro_APK_Maker
                 commandLine("rmdir balatro-apk\\ /S /Q");
                 commandLine("del balatro-aligned-debugSigned.apk.idsig");
                 commandLine("del balatro.apk");
-            } else {
+            }
+            else
+            {
                 log("Renaming unsigned apk...");
                 commandLine("move balatro.apk balatro-unsigned.apk");
             }
@@ -378,9 +422,11 @@ namespace Balatro_APK_Maker
             commandLineProccess.WaitForExit();
 
             //On exit
-            commandLineProccess.Exited += (object sender, EventArgs e) => {
+            commandLineProccess.Exited += (object sender, EventArgs e) =>
+                {
                     //Check for errors
-                    if (commandLineProccess.ExitCode != 0) {
+                    if (commandLineProccess.ExitCode != 0)
+                    {
                         //Error occurred
                         log("An unexpected error occurred!");
                         if (!verboseMode)
@@ -395,9 +441,8 @@ namespace Balatro_APK_Maker
         //Prints the output (or errors) if verbose mode is enabled
         private static void processOutputHandler(object sender, DataReceivedEventArgs e)
         {
-            if (e.Data != null && verboseMode) {
+            if (verboseMode && e.Data != null)
                 log(e.Data.ToString());
-            }
         }
     }
 }
