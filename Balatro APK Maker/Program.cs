@@ -373,9 +373,20 @@ namespace Balatro_APK_Maker
 
                 tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
 
-                log("Extracting platform-tools...");
+                //TODO: Repeated code
                 if (!Directory.Exists("platform-tools"))
+                {
+                    log("Platform tools not found...");
+
+                    if (!File.Exists("platform-tools.zip"))
+                        tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
+
+                    if (!File.Exists("7za.exe"))
+                        tryDownloadFile("7-Zip", sevenzipLink, "7za.exe");
+
+                    log("Extracting platform-tools...");
                     commandLine("7za x platform-tools.zip -oplatform-tools");
+                }
 
                 log("Attempting to install. If prompted, please allow the USB Debugging connection on your Android device.");
                 commandLine("cd platform-tools && cd platform-tools && adb install ..\\..\\balatro.apk && adb kill-server");
@@ -388,6 +399,7 @@ namespace Balatro_APK_Maker
                 while (!askQuestion("Is your Android device connected to the host with balatro.apk installed, and USB Debugging enabled?"))
                     log("Please install balatro.apk, enable USB Debugging on your Android device, and connect it to the host.");
 
+                //TODO: Repeated code
                 if (!Directory.Exists("platform-tools"))
                 {
                     log("Platform tools not found...");
