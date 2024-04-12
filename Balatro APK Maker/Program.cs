@@ -439,6 +439,7 @@ namespace Balatro_APK_Maker
             {
                 if (askQuestion("Would you like to pull saves from your Android device?"))
                 {
+                    log("Warning! If Steam Cloud is enabled, it will overwrite the save you transfer!");
                     while (!askQuestion("Have you backed up your saves?"))
                         log("Please back up your saves! I am not responsible if your saves get deleted!");
 
