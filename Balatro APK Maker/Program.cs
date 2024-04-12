@@ -29,30 +29,26 @@ namespace Balatro_APK_Maker
             string[] loadedFile = File.ReadAllLines("Balatro\\" + file);
 
             //Search for the line to replace
-            bool success = false;
+            bool found = false;
             for (int i = 0; i < loadedFile.Length; i++)
-            {
                 if (loadedFile[i].IndexOf(lineContains) != -1)
                 {
                     //Replace the line
                     loadedFile[i] = replaceWith;
-                    success = true;
+                    found = true;
                     break;
                 }
-            }
 
-            if (!success)
-            {
-                log("Unable to find patch location...");
-            }
-            else 
+            if (found)
             {
                 //If it is found, write the file.
                 log("Successfully applied patch...");
                 File.WriteAllLines("Balatro\\" + file, loadedFile);
             }
+            else
+                log("Unable to find patch location...");
 
-            return success;
+            return found;
         }
 
         //Prompts the user to select which patches they want, then applies them.
@@ -188,6 +184,29 @@ namespace Balatro_APK_Maker
             return input == "y";
         }
 
+        //Prepare platform-tools to be used, and prompt the user to enable USB Debugging
+        static void prepareAndroidPlatformTools()
+        {
+            //Check whether they already exist
+            if (!Directory.Exists("platform-tools"))
+            {
+                log("Platform tools not found...");
+
+                if (!File.Exists("platform-tools.zip"))
+                    tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
+
+                if (!File.Exists("7za.exe"))
+                    tryDownloadFile("7-Zip", sevenzipLink, "7za.exe");
+
+                log("Extracting platform-tools...");
+                commandLine("7za x platform-tools.zip -oplatform-tools");
+            }
+
+            //Prompt user
+            while (!askQuestion("Is your Android device connected to the host with USB Debugging enabled?"))
+                log("Please enable USB Debugging on your Android device, and connect it to the host.");
+        }
+
         static void Main(string[] args)
         {
             bool exeProvided = File.Exists("Balatro.exe");
@@ -195,12 +214,14 @@ namespace Balatro_APK_Maker
             log("====Balatro APK Maker====\n7-Zip is licensed under the GNU LGPL license. Please visit: www.7-zip.org\n\n");
 
             //Initial prompts
-            bool cleanUpTools = askQuestion("Would you like to clean up temporary tools?");
-            bool cleanUpFiles = askQuestion("Would you like to clean up temporary folders and files?");
-            verboseMode = askQuestion("Would you like to run in verbose mode?");
+            bool cleanup = askQuestion("Would you like to automatically clean up once complete?");
+            verboseMode = askQuestion("Would you like to enable extra logging information?");
 
+            //If balatro.apk already exists, ask before beginning build process again
             if (!File.Exists("balatro.apk") || askQuestion("A previous build of balatro.apk was found... Would you like to build again?"))
             {
+                #region Download tools
+                #region Java
                 //Check for Java
                 log("Checking for Java...");
                 if (commandLine(javaCommand).ExitCode == 0)
@@ -234,7 +255,9 @@ namespace Balatro_APK_Maker
                         exit();
                     }
                 }
+                #endregion
 
+                #region All other tools
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads = {
                     new Thread(() => { tryDownloadFile("7-Zip", sevenzipLink, "7za.exe"); }),
@@ -251,7 +274,11 @@ namespace Balatro_APK_Maker
                 //Wait for all the downloads to complete
                 for (int i = 0; i < downloadThreads.Length; i++)
                     downloadThreads[i].Join();
+                #endregion
+                #endregion
 
+                #region Prepare workspace
+                #region Find and extract Balatro.exe
                 if (!exeProvided)
                 {
                     //Attempt to copy Balatro.exe from Steam directory
@@ -285,7 +312,9 @@ namespace Balatro_APK_Maker
                     log("Failed to extract Balatro.exe!");
                     exit();
                 }
+                #endregion
 
+                #region Extract APK
                 log("Unpacking Love2D APK with APK Tool...");
                 if (Directory.Exists("balatro-apk"))
                 {
@@ -303,7 +332,9 @@ namespace Balatro_APK_Maker
                     log("Failed to unpack Love2D APK with APK Tool!");
                     exit();
                 }
+                #endregion
 
+                #region Extract APK patch
                 log("Extracting patch zip...");
                 if (Directory.Exists("Balatro-APK-Patch"))
                 {
@@ -319,13 +350,22 @@ namespace Balatro_APK_Maker
                     log("Failed to extract Balatro-APK-Patch");
                     exit();
                 }
+                #endregion
+                #endregion
 
+                #region Patches
+                //Base APK patch
                 log("Patching APK folder...");
                 commandLine("xcopy \"Balatro-APK-Patch\\\" \"balatro-apk\\\" /E /H /Y /V");
 
+                //Balatro code patches
                 log("Patching...");
                 applyPatches();
+                #endregion
 
+                #region Building
+
+                #region Balatro.exe -> game.love
                 log("Packing Balatro folder...");
                 commandLine("\"cd Balatro && ..\\7za.exe a balatro.zip && cd ..\"");
 
@@ -337,7 +377,10 @@ namespace Balatro_APK_Maker
 
                 log("Moving archive...");
                 commandLine("move Balatro\\balatro.zip balatro-apk\\assets\\game.love");
+                #endregion
 
+                #region APK
+                #region Packing
                 log("Repacking APK...");
                 commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" b -o balatro.apk balatro-apk");
 
@@ -346,7 +389,9 @@ namespace Balatro_APK_Maker
                     log("Failed to pack Balatro apk!");
                     exit();
                 }
+                #endregion
 
+                #region Signing
                 log("Signing APK...");
                 commandLine("java -jar uber-apk-signer.jar -a balatro.apk");
 
@@ -361,67 +406,42 @@ namespace Balatro_APK_Maker
 
                 log("Renaming signed apk...");
                 commandLine("move balatro-aligned-debugSigned.apk balatro.apk");
-                
+                #endregion
+
                 log("Build successful!");
+                #endregion
+                #endregion
             }
 
-
+            #region Android options
+            #region Auto-install
             if (askQuestion("Would you like to automaticaly install balatro.apk on your Android device?"))
             {
-                while (!askQuestion("Is your Android device connected to the host with USB Debugging enabled?"))
-                    log("Please enable USB Debugging on your Android device, and connect it to the host.");
-
-                tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
-
-                //TODO: Repeated code
-                if (!Directory.Exists("platform-tools"))
-                {
-                    log("Platform tools not found...");
-
-                    if (!File.Exists("platform-tools.zip"))
-                        tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
-
-                    if (!File.Exists("7za.exe"))
-                        tryDownloadFile("7-Zip", sevenzipLink, "7za.exe");
-
-                    log("Extracting platform-tools...");
-                    commandLine("7za x platform-tools.zip -oplatform-tools");
-                }
+                prepareAndroidPlatformTools();
 
                 log("Attempting to install. If prompted, please allow the USB Debugging connection on your Android device.");
                 commandLine("cd platform-tools && cd platform-tools && adb install ..\\..\\balatro.apk && adb kill-server");
             }
+            #endregion
 
+            #region Save transfer
             if (Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Anroid device?"))
             {
                 log("Thanks to TheCatRiX for figuring out save transfers!");
 
-                while (!askQuestion("Is your Android device connected to the host with balatro.apk installed, and USB Debugging enabled?"))
-                    log("Please install balatro.apk, enable USB Debugging on your Android device, and connect it to the host.");
-
-                //TODO: Repeated code
-                if (!Directory.Exists("platform-tools"))
-                {
-                    log("Platform tools not found...");
-
-                    if (!File.Exists("platform-tools.zip"))
-                        tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
-
-                    if (!File.Exists("7za.exe"))
-                        tryDownloadFile("7-Zip", sevenzipLink, "7za.exe");
-
-                    log("Extracting platform-tools...");
-                    commandLine("7za x platform-tools.zip -oplatform-tools");
-                }
+                prepareAndroidPlatformTools();
 
                 log("Attempting to transfer saves. If prompted, please allow the USB Debugging connection on your Android device.");
                 commandLine("cd platform-tools && cd platform-tools && adb push %AppData%/Balatro/. /data/local/tmp/balatro/files/save/game && adb shell am force-stop com.unofficial.balatro && adb shell run-as com.unofficial.balatro cp -r /data/local/tmp/balatro/files . && adb shell rm -r /data/local/tmp/balatro && adb kill-server");
 
             }
+            #endregion
+            #endregion
 
-            if (cleanUpTools)
+            #region Cleanup
+            if (cleanup)
             {
-                log("Deleting tools...");
+                log("Deleting temporary files...");
 
                 commandLine("del java-installer.exe");
                 commandLine("del love-11.5-android-embed.apk");
@@ -429,23 +449,19 @@ namespace Balatro_APK_Maker
                 commandLine("del apktool.jar");
                 commandLine("del uber-apk-signer.jar");
                 commandLine("del 7za.exe");
-                commandLine("rmdir platform-tools\\ /S /Q");
-            }
-
-            if (cleanUpFiles)
-            {
-                log("Deleting temporary files...");
-
-                commandLine("rmdir Balatro-APK-Patch\\ /S /Q");
-                commandLine("rmdir Balatro\\ /S /Q");
-                commandLine("rmdir balatro-apk\\ /S /Q");
                 commandLine("del balatro-aligned-debugSigned.apk.idsig");
                 commandLine("del balatro-unsigned.apk");
                 commandLine("del platform-tools.zip");
+                commandLine("rmdir platform-tools\\ /S /Q");
+                commandLine("rmdir Balatro-APK-Patch\\ /S /Q");
+                commandLine("rmdir Balatro\\ /S /Q");
+                commandLine("rmdir balatro-apk\\ /S /Q");
                 if (!exeProvided)
                     commandLine("del Balatro.exe");
             }
+            #endregion
 
+            log("Finished!");
             exit();
         }
 
@@ -485,6 +501,8 @@ namespace Balatro_APK_Maker
                         if (!verboseMode)
                             log("Try running in verbose mode to determine the cause of the error.");
                     }
+                    else
+                        log("\n");
                 };
 
             //Return the process
@@ -495,7 +513,7 @@ namespace Balatro_APK_Maker
         private static void processOutputHandler(object sender, DataReceivedEventArgs e)
         {
             if (verboseMode && e.Data != null)
-                log(e.Data.ToString());
+                log("    " + e.Data.ToString());
         }
     }
 }
