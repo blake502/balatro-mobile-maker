@@ -432,6 +432,10 @@ namespace Balatro_APK_Maker
                 prepareAndroidPlatformTools();
 
                 log("Attempting to transfer saves. If prompted, please allow the USB Debugging connection on your Android device.");
+                commandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro");
+                commandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files");
+                commandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files/save");
+                commandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files/save/game");
                 commandLine("cd platform-tools && cd platform-tools && adb push %AppData%/Balatro/. /data/local/tmp/balatro/files/save/game && adb shell am force-stop com.unofficial.balatro && adb shell run-as com.unofficial.balatro cp -r /data/local/tmp/balatro/files . && adb shell rm -r /data/local/tmp/balatro && adb kill-server");
 
             }
