@@ -17,6 +17,7 @@ namespace Balatro_APK_Maker
         const string uberapktoolLink = "https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar";
         const string balatroApkPatchLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/Balatro-APK-Patch.zip";
         const string love2dApkLink = "https://github.com/love2d/love-android/releases/download/11.5a/love-11.5-android-embed.apk";
+        const string platformTools = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
 
         static bool verboseMode = false;
 
@@ -359,6 +360,12 @@ namespace Balatro_APK_Maker
                 exit();
             }
 
+            log("Renaming unsigned apk...");
+            commandLine("move balatro.apk balatro-unsigned.apk");
+
+            log("Renaming signed apk...");
+            commandLine("move balatro-aligned-debugSigned.apk balatro.apk");
+
             if (cleanUpTools)
             {
                 log("Deleting tools...");
@@ -366,7 +373,6 @@ namespace Balatro_APK_Maker
                 commandLine("del java-installer.exe");
                 commandLine("del love-11.5-android-embed.apk");
                 commandLine("del Balatro-APK-Patch.zip");
-                commandLine("del 7za.exe");
                 commandLine("del apktool.jar");
                 commandLine("del uber-apk-signer.jar");
             }
@@ -385,18 +391,41 @@ namespace Balatro_APK_Maker
                 commandLine("rmdir Balatro\\ /S /Q");
                 commandLine("rmdir balatro-apk\\ /S /Q");
                 commandLine("del balatro-aligned-debugSigned.apk.idsig");
-                commandLine("del balatro.apk");
+                commandLine("del balatro-unsigned.apk");
             }
-            else
+
+            log("Success! Please install balatro.apk on your Android device.");
+
+            if (Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Anroid device?"))
             {
-                log("Renaming unsigned apk...");
-                commandLine("move balatro.apk balatro-unsigned.apk");
+                log("Thanks to TheCatRiX for figuring out save transfers!");
+                //Sanity checks
+                while (!askQuestion("Has balatro.apk been installed on your Android device?"))
+                    log("Please install balatro.apk on your Android device, then contiue to transfer your saves.");
+
+                while (!askQuestion("Is your Android device connected to the device running balatro-apk-maker?"))
+                    log("Please connect your Android device to the device running balatro-apk-maker, then continue to transfer your saves.");
+
+                while (!askQuestion("Is USB Debugging enabled on your Android device?"))
+                    log("Please enable USB Debugging on your Android device, then continue to transfer your saves.");
+
+                tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
+
+                log("Extracting platform-tools...");
+                commandLine("7za x platform-tools.zip -oplatform-tools");
+
+                log("Attempting to transfer saves. If prompted, please allow the USB Debugging connection on your Android device.");
+                commandLine("cd platform-tools && cd platform-tools && adb push %AppData%/Balatro/1/. /data/local/tmp/1 && adb shell run-as com.unofficial.balatro cp -r /data/local/tmp/1 files/save/game && adb shell rm -r /data/local/tmp/1");
+
+                if (cleanUpTools)
+                    commandLine("rmdir platform-tools\\ /S /Q");
+
+                if (cleanUpFiles)
+                    commandLine("del platform-tools.zip");
             }
 
-            log("Renaming signed apk...");
-            commandLine("move balatro-aligned-debugSigned.apk balatro.apk");
-
-            log("Success!");
+            if (cleanUpTools)
+                commandLine("del 7za.exe");
 
             exit();
         }
