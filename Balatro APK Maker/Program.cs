@@ -190,6 +190,8 @@ namespace Balatro_APK_Maker
 
         static void Main(string[] args)
         {
+            bool exeProvided = File.Exists("Balatro.exe");
+
             log("====Balatro APK Maker====\n7-Zip is licensed under the GNU LGPL license. Please visit: www.7-zip.org\n\n");
 
             //Initial prompts
@@ -197,174 +199,213 @@ namespace Balatro_APK_Maker
             bool cleanUpFiles = askQuestion("Would you like to clean up temporary folders and files?");
             verboseMode = askQuestion("Would you like to run in verbose mode?");
 
-            //Check for Java
-            log("Checking for Java...");
-            if (commandLine(javaCommand).ExitCode == 0)
+            if (!File.Exists("balatro.apk") || askQuestion("A previous build of balatro.apk was found... Would you like to build again?"))
             {
-                log("Java found.");
-            }
-            else
-            {
-                log("Java not found, please install Java!");
-
-                //Prompt user to automatically download install Java
-                if (askQuestion("Would you like to automatically download and install Java?"))
+                //Check for Java
+                log("Checking for Java...");
+                if (commandLine(javaCommand).ExitCode == 0)
+                    log("Java found.");
+                else
                 {
-                    //Download
-                    tryDownloadFile("Java", jre8installerLink, "java-installer.exe");
-                    //Install
-                    log("Installing Java...");
-                    commandLine("java-installer.exe /s");
+                    log("Java not found, please install Java!");
 
-                    //Check again for Java
-                    if (commandLine(javaCommand).ExitCode != 0)
+                    //Prompt user to automatically download install Java
+                    if (askQuestion("Would you like to automatically download and install Java?"))
                     {
-                        //Critical error
-                        log("Java still not detected!");
+                        //Download
+                        tryDownloadFile("Java", jre8installerLink, "java-installer.exe");
+                        //Install
+                        log("Installing Java...");
+                        commandLine("java-installer.exe /s");
+
+                        //Check again for Java
+                        if (commandLine(javaCommand).ExitCode != 0)
+                        {
+                            //Critical error
+                            log("Java still not detected!");
+                            exit();
+                        }
+                    }
+                    else
+                    {
+                        //User does not wish to automatically download and install Java
+                        //Take them to the download link instead. Halt program
+                        commandLine(javaDownloadCommand);
+                        exit();
+                    }
+                }
+
+                //Downloading tools. Handled in threads to allow simultaneous downloads
+                Thread[] downloadThreads = {
+                    new Thread(() => { tryDownloadFile("7-Zip", sevenzipLink, "7za.exe"); }),
+                    new Thread(() => { tryDownloadFile("APKTool", apktoolLink, "apktool.jar"); }),
+                    new Thread(() => { tryDownloadFile("uber-apk-signer", uberapktoolLink, "uber-apk-signer.jar"); }),
+                    new Thread(() => { tryDownloadFile("Balatro-APK-Patch", balatroApkPatchLink, "Balatro-APK-Patch.zip"); }),
+                    new Thread(() => { tryDownloadFile("Love2D APK", love2dApkLink, "love-11.5-android-embed.apk"); })
+                };
+
+                //Start all the downloads
+                for (int i = 0; i < downloadThreads.Length; i++)
+                    downloadThreads[i].Start();
+
+                //Wait for all the downloads to complete
+                for (int i = 0; i < downloadThreads.Length; i++)
+                    downloadThreads[i].Join();
+
+                if (!exeProvided)
+                {
+                    //Attempt to copy Balatro.exe from Steam directory
+                    log("Copying Balatro.exe from Steam directory...");
+                    commandLine("xcopy \"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Balatro\\Balatro.exe\" \"Balatro.exe\" /E /H /Y /V /-I");
+
+                    if (!File.Exists("Balatro.exe"))
+                    {
+                        //Balatro.exe still not found. Critical error.
+                        log("Could not find Balatro.exe! Please place it in this folder, then try again!");
                         exit();
                     }
                 }
                 else
+                    log("Balatro.exe already exists.");
+
+                log("Extracting Balatro.exe...");
+                if (Directory.Exists("Balatro"))
                 {
-                    //User does not wish to automatically download and install Java
-                    //Take them to the download link instead. Halt program
-                    commandLine(javaDownloadCommand);
+                    //Delete the Balatro folder if it already exists
+                    log("Balatro directory already exists! Deleting Balatro directory...");
+                    commandLine("rmdir Balatro\\ /S /Q");
+                }
+
+                //Extract Balatro.exe with 7-Zip
+                commandLine("7za x Balatro.exe -oBalatro");
+
+                //Check for failure
+                if (!Directory.Exists("Balatro"))
+                {
+                    log("Failed to extract Balatro.exe!");
                     exit();
                 }
-            }
 
-            //Downloading tools. Handled in threads to allow simultaneous downloads
-            Thread[] downloadThreads = {
-                new Thread(() => { tryDownloadFile("7-Zip", sevenzipLink, "7za.exe"); }),
-                new Thread(() => { tryDownloadFile("APKTool", apktoolLink, "apktool.jar"); }),
-                new Thread(() => { tryDownloadFile("uber-apk-signer", uberapktoolLink, "uber-apk-signer.jar"); }),
-                new Thread(() => { tryDownloadFile("Balatro-APK-Patch", balatroApkPatchLink, "Balatro-APK-Patch.zip"); }),
-                new Thread(() => { tryDownloadFile("Love2D APK", love2dApkLink, "love-11.5-android-embed.apk"); })
-            };
-
-            //Start all the downloads
-            for (int i = 0; i < downloadThreads.Length; i++)
-                downloadThreads[i].Start();
-
-            //Wait for all the downloads to complete
-            for (int i = 0; i < downloadThreads.Length; i++)
-                downloadThreads[i].Join();
-
-
-            bool exeProvided = false;
-            if (!File.Exists("Balatro.exe"))
-            {
-                //Attempt to copy Balatro.exe from Steam directory
-                log("Copying Balatro.exe from Steam directory...");
-                commandLine("xcopy \"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Balatro\\Balatro.exe\" \"Balatro.exe\" /E /H /Y /V /-I");
-
-                if (!File.Exists("Balatro.exe"))
+                log("Unpacking Love2D APK with APK Tool...");
+                if (Directory.Exists("balatro-apk"))
                 {
-                    //Balatro.exe still not found. Critical error.
-                    log("Could not find Balatro.exe! Please place it in this folder, then try again!");
+                    //Delete the balatro-apk folder if it already exists
+                    log("balatro-apk directory already exists! Deleting balatro-apk directory...");
+                    commandLine("rmdir balatro-apk\\ /S /Q");
+                }
+
+                //Unpack Love2D APK
+                commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
+
+                //Check for failure
+                if (!Directory.Exists("balatro-apk"))
+                {
+                    log("Failed to unpack Love2D APK with APK Tool!");
                     exit();
                 }
+
+                log("Extracting patch zip...");
+                if (Directory.Exists("Balatro-APK-Patch"))
+                {
+                    log("Balatro-APK-Patch directory already exists! Deleting Balatro-APK-Patch directory...");
+                    commandLine("rmdir Balatro-APK-Patch\\ /S /Q");
+                }
+
+                //Extract Balatro-APK-Patch
+                commandLine("7za.exe  x Balatro-APK-Patch.zip -oBalatro-APK-Patch");
+
+                if (!Directory.Exists("Balatro-APK-Patch"))
+                {
+                    log("Failed to extract Balatro-APK-Patch");
+                    exit();
+                }
+
+                log("Patching APK folder...");
+                commandLine("xcopy \"Balatro-APK-Patch\\\" \"balatro-apk\\\" /E /H /Y /V");
+
+                log("Patching...");
+                applyPatches();
+
+                log("Packing Balatro folder...");
+                commandLine("\"cd Balatro && ..\\7za.exe a balatro.zip && cd ..\"");
+
+                if (!File.Exists("Balatro\\balatro.zip"))
+                {
+                    log("Failed to pack Balatro folder!");
+                    exit();
+                }
+
+                log("Moving archive...");
+                commandLine("move Balatro\\balatro.zip balatro-apk\\assets\\game.love");
+
+                log("Repacking APK...");
+                commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" b -o balatro.apk balatro-apk");
+
+                if (!File.Exists("balatro.apk"))
+                {
+                    log("Failed to pack Balatro apk!");
+                    exit();
+                }
+
+                log("Signing APK...");
+                commandLine("java -jar uber-apk-signer.jar -a balatro.apk");
+
+                if (!File.Exists("balatro-aligned-debugSigned.apk"))
+                {
+                    log("Failed to sign APK!");
+                    exit();
+                }
+
+                log("Renaming unsigned apk...");
+                commandLine("move balatro.apk balatro-unsigned.apk");
+
+                log("Renaming signed apk...");
+                commandLine("move balatro-aligned-debugSigned.apk balatro.apk");
+                
+                log("Build successful!");
             }
-            else
+
+
+            if (askQuestion("Would you like to automaticaly install balatro.apk on your Android device?"))
             {
-                //User provided Balatro.exe
-                exeProvided = true;
-                log("Balatro.exe already exists.");
+                while (!askQuestion("Is your Android device connected to the host with USB Debugging enabled?"))
+                    log("Please enable USB Debugging on your Android device, and connect it to the host.");
+
+                tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
+
+                log("Extracting platform-tools...");
+                if (!Directory.Exists("platform-tools"))
+                    commandLine("7za x platform-tools.zip -oplatform-tools");
+
+                log("Attempting to install. If prompted, please allow the USB Debugging connection on your Android device.");
+                commandLine("cd platform-tools && cd platform-tools && adb install ..\\..\\balatro.apk && adb kill-server");
             }
 
-            log("Extracting Balatro.exe");
-            if (Directory.Exists("Balatro"))
+            if (Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Anroid device?"))
             {
-                //Delete the Balatro folder if it already exists
-                log("Balatro directory already exists! Deleting Balatro directory...");
-                commandLine("rmdir Balatro\\ /S /Q");
+                log("Thanks to TheCatRiX for figuring out save transfers!");
+
+                while (!askQuestion("Is your Android device connected to the host with balatro.apk installed, and USB Debugging enabled?"))
+                    log("Please install balatro.apk, enable USB Debugging on your Android device, and connect it to the host.");
+
+                if (!Directory.Exists("platform-tools"))
+                {
+                    log("Platform tools not found...");
+
+                    if (!File.Exists("platform-tools.zip"))
+                        tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
+
+                    if (!File.Exists("7za.exe"))
+                        tryDownloadFile("7-Zip", sevenzipLink, "7za.exe");
+
+                    log("Extracting platform-tools...");
+                    commandLine("7za x platform-tools.zip -oplatform-tools");
+                }
+
+                log("Attempting to transfer saves. If prompted, please allow the USB Debugging connection on your Android device.");
+                commandLine("cd platform-tools && cd platform-tools && adb push %AppData%/Balatro/. /data/local/tmp/balatro/files/save/game && adb shell am force-stop com.unofficial.balatro && adb shell run-as com.unofficial.balatro cp -r /data/local/tmp/balatro/files . && adb shell rm -r /data/local/tmp/balatro && adb kill-server");
+
             }
-
-            //Extract Balatro.exe with 7-Zip
-            commandLine("7za x Balatro.exe -oBalatro");
-
-            //Check for failure
-            if (!Directory.Exists("Balatro"))
-            {
-                log("Failed to extract Balatro.exe!");
-                exit();
-            }
-
-            log("Unpacking Love2D APK with APK Tool...");
-            if (Directory.Exists("balatro-apk"))
-            {
-                //Delete the balatro-apk folder if it already exists
-                log("balatro-apk directory already exists! Deleting balatro-apk directory...");
-                commandLine("rmdir balatro-apk\\ /S /Q");
-            }
-
-            //Unpack Love2D APK
-            commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
-
-            //Check for failure
-            if (!Directory.Exists("balatro-apk"))
-            {
-                log("Failed to unpack Love2D APK with APK Tool!");
-                exit();
-            }
-
-            log("Extracting patch zip...");
-            if (Directory.Exists("Balatro-APK-Patch"))
-            {
-                log("Balatro-APK-Patch directory already exists! Deleting Balatro-APK-Patch directory...");
-                commandLine("rmdir Balatro-APK-Patch\\ /S /Q");
-            }
-
-            //Extract Balatro-APK-Patch
-            commandLine("7za.exe  x Balatro-APK-Patch.zip -oBalatro-APK-Patch");
-
-            if (!Directory.Exists("Balatro-APK-Patch"))
-            {
-                log("Failed to extract Balatro-APK-Patch");
-                exit();
-            }
-
-            log("Patching APK folder...");
-            commandLine("xcopy \"Balatro-APK-Patch\\\" \"balatro-apk\\\" /E /H /Y /V");
-
-            log("Patching...");
-            applyPatches();
-
-            log("Packing Balatro folder...");
-            commandLine("\"cd Balatro && ..\\7za.exe a balatro.zip && cd ..\"");
-
-            if (!File.Exists("Balatro\\balatro.zip"))
-            {
-                log("Failed to pack Balatro folder!");
-                exit();
-            }
-
-            log("Moving archive...");
-            commandLine("move Balatro\\balatro.zip balatro-apk\\assets\\game.love");
-
-            log("Repacking APK...");
-            commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" b -o balatro.apk balatro-apk");
-
-            if (!File.Exists("balatro.apk"))
-            {
-                log("Failed to pack Balatro apk!");
-                exit();
-            }
-
-            log("Signing APK...");
-            commandLine("java -jar uber-apk-signer.jar -a balatro.apk");
-
-            if (!File.Exists("balatro-aligned-debugSigned.apk"))
-            {
-                log("Failed to sign APK!");
-                exit();
-            }
-
-            log("Renaming unsigned apk...");
-            commandLine("move balatro.apk balatro-unsigned.apk");
-
-            log("Renaming signed apk...");
-            commandLine("move balatro-aligned-debugSigned.apk balatro.apk");
 
             if (cleanUpTools)
             {
@@ -375,57 +416,23 @@ namespace Balatro_APK_Maker
                 commandLine("del Balatro-APK-Patch.zip");
                 commandLine("del apktool.jar");
                 commandLine("del uber-apk-signer.jar");
+                commandLine("del 7za.exe");
+                commandLine("rmdir platform-tools\\ /S /Q");
             }
 
             if (cleanUpFiles)
             {
-                if (!exeProvided)
-                {
-                    log("Deleting Balatro.exe");
-                    commandLine("del Balatro.exe");
-                }
-
-                log("Deleting other temporary files...");
+                log("Deleting temporary files...");
 
                 commandLine("rmdir Balatro-APK-Patch\\ /S /Q");
                 commandLine("rmdir Balatro\\ /S /Q");
                 commandLine("rmdir balatro-apk\\ /S /Q");
                 commandLine("del balatro-aligned-debugSigned.apk.idsig");
                 commandLine("del balatro-unsigned.apk");
+                commandLine("del platform-tools.zip");
+                if (!exeProvided)
+                    commandLine("del Balatro.exe");
             }
-
-            log("Success! Please install balatro.apk on your Android device.");
-
-            if (Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Anroid device?"))
-            {
-                log("Thanks to TheCatRiX for figuring out save transfers!\nPlease install balatro.apk to your Android device, connect your Android device to the device running balatro-apk-maker, enable USB Debugging, and ensure that Balatro is not currently running on your Android device (force close).");
-                //Sanity checks
-                while (!askQuestion("Has balatro.apk been installed on your Android device?"))
-                    log("Please install balatro.apk on your Android device, then contiue to transfer your saves.");
-
-                while (!askQuestion("Is your Android device connected to the device running balatro-apk-maker?"))
-                    log("Please connect your Android device to the device running balatro-apk-maker, then continue to transfer your saves.");
-
-                while (!askQuestion("Is USB Debugging enabled on your Android device?"))
-                    log("Please enable USB Debugging on your Android device, then continue to transfer your saves.");
-
-                tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
-
-                log("Extracting platform-tools...");
-                commandLine("7za x platform-tools.zip -oplatform-tools");
-
-                log("Attempting to transfer saves. If prompted, please allow the USB Debugging connection on your Android device.");
-                commandLine("cd platform-tools && cd platform-tools && adb push %AppData%/Balatro/1/. /data/local/tmp/1 && adb shell run-as com.unofficial.balatro cp -r /data/local/tmp/1 files/save/game && adb shell rm -r /data/local/tmp/1");
-
-                if (cleanUpTools)
-                    commandLine("rmdir platform-tools\\ /S /Q");
-
-                if (cleanUpFiles)
-                    commandLine("del platform-tools.zip");
-            }
-
-            if (cleanUpTools)
-                commandLine("del 7za.exe");
 
             exit();
         }
