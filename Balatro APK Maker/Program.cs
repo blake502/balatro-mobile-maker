@@ -398,7 +398,7 @@ namespace Balatro_APK_Maker
 
             if (Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Anroid device?"))
             {
-                log("Thanks to TheCatRiX for figuring out save transfers!");
+                log("Thanks to TheCatRiX for figuring out save transfers!\nPlease install balatro.apk to your Android device, connect your Android device to the device running balatro-apk-maker, enable USB Debugging, and ensure that Balatro is not currently running on your Android device (force close).");
                 //Sanity checks
                 while (!askQuestion("Has balatro.apk been installed on your Android device?"))
                     log("Please install balatro.apk on your Android device, then contiue to transfer your saves.");
