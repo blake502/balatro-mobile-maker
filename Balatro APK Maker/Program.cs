@@ -59,6 +59,7 @@ namespace Balatro_APK_Maker
         static void applyPatches()
         {
             log("Applying Android compatibilty patch...");
+            //Android platform support
             applyPatch("globals.lua", "loadstring", @"    -- Removed 'loadstring' line which generated lua code that exited upon starting on mobile
     if love.system.getOS() == 'Android' then
         self.F_DISCORD = true
@@ -68,6 +69,8 @@ namespace Balatro_APK_Maker
         self.F_ENGLISH_ONLY = false
         self.F_QUIT_BUTTON = false
     end");
+            //On-screen keyboard
+            applyPatch("functions/button_callbacks.lua", "G.CONTROLLER.text_input_hook == e and G.CONTROLLER.HID.controller", "  if G.CONTROLLER.text_input_hook == e and (G.CONTROLLER.HID.controller or G.CONTROLLER.HID.touch) then");
 
             //Ask whether they want the FPS cap patch
             if (askQuestion("Would you like to apply the FPS cap patch?"))
@@ -119,11 +122,10 @@ namespace Balatro_APK_Maker
                 applyPatch("game.lua", "G.SHADERS['CRT'])", "");
             }
 
-            if (askQuestion("Would you like to apply the accessible saves patch?"))
+            //Disabled, since this seems to actually be the HARDER way of doing this
+            //I'll leave it in the code base for now though...
+            if (false && askQuestion("Would you like to apply the accessible saves patch?")) 
                 applyPatch("conf.lua", "t.window.width = 0", "    t.window.width = 0\n    t.externalstorage = true");
-            
-            if (askQuestion("Would you like to apply the screen keyboard patch?"))
-                applyPatch("functions/button_callbacks.lua", "G.CONTROLLER.text_input_hook == e and G.CONTROLLER.HID.controller", "  if G.CONTROLLER.text_input_hook == e and (G.CONTROLLER.HID.controller or G.CONTROLLER.HID.touch) then");
         }
 
         //Attempts to download a file if it does not exist.

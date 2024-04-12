@@ -16,8 +16,6 @@ Caps FPS to a desired number (Or to the device's native refresh rate-- recommend
 Locks the game to landscape orientation (Recommended, since portrait orientation does not behave very well)
 - **CRT Shader Disable**
 Disables the CRT Shader (Recommended for Pixel and some other devices)
-- **Accessible Saves**
-Changes the save path from `data/data/com.unofficial.balatro/files` to `sdcard/Android/data/com.unofficial.balatro/files`. Accessing this location with the lastest versions of Android is still tricky, but it should make it easier for root users. (Recommended for most cases)
 
 ## Notes
  - This script assumes that **Balatro.exe** is located in the default *Steam* directory (`C:\Program Files (x86)\Steam\steamapps\common\Balatro\Balatro.exe`). If it is not, simply copy your **Balatro.exe** to the same folder as **balatro-apk-maker.exe**
