@@ -1,13 +1,14 @@
 # Balatro APK Maker
 
-This goal of this script is to allow *Balatro* fans to play *Balatro* on their mobile devices before the official release. This script provides a **NON-PIRACY** avenue for players to do so, by converting their *Steam* version of *Balatro* to an APK format.
+This goal of this script is to allow *Balatro* fans to play *Balatro* on their mobile devices before the official release. This script provides a **NON-PIRACY** avenue for players to do so, by converting their *Steam* version of *Balatro* to an APK format. Balatro APK Maker also supports automatically transferring your saves from your *Steam* copy.
 
 ## Quick Start Guide
 Please review the **Notes** section before you begin.
  - Download or compile [**balatro-apk-maker.exe**](https://github.com/blake502/balatro-apk-maker/releases).
  - Run **balatro-apk-maker.exe**.
  - Follow the prompts to apply optional patches. If you're unsure, always select "Y".
- - Copy the resulting **balatro.apk** to your Android device.
+ - Copy the resulting **balatro.apk** to your Android device, or allow the program to automatically install using [USB Debugging](https://developer.android.com/studio/debug/dev-options).
+ - Optionally, allow the program to automatically transfer your saves from your *Steam* copy of *Balatro* using [USB Debugging](https://developer.android.com/studio/debug/dev-options).
 
  ## Optional Patches
 - **FPS Cap**
@@ -24,7 +25,17 @@ Disables the CRT Shader (Recommended for Pixel and some other devices)
  - This script will automatically download [APK Tool](https://apktool.org/)
  - This script will automatically download [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer/)
  - This script will automatically download [love-11.5-android-embed.apk](https://github.com/love2d/love-android/)
- - This script will automatically download [Balatro-APK-Patch](http://smudge.codes/files/Balatro-APK-Patch.zip)
+ - This script will automatically download [Balatro-APK-Patch](https://github.com/blake502/balatro-apk-maker/releases/tag/Additional-Tools-1.0)
+
+ ## Recogition (in no particular order)
+ - [PGgamer2](https://github.com/PGgamer2) for many contributions (including language switching and dynamic FPS capping)
+ - [TheCatRiX](https://github.com/TheCatRiX) for many contributions (include on-screen keyboard and save transferring)
+ - [Blake502](https://github.com/Blake502) for initial release and continued support
+ - Developers of [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer)
+ - Developers of [LÖVE](https://love2d.org/)
+ - Developers of [7-Zip](https://www.7-zip.org/)
+ - Developers of [APKTool](https://apktool.org/)
+ - Delevopers of [Balatro](https://www.playbalatro.com/)
 
  ## License
  [7-Zip](https://github.com/ip7z/7zip/blob/main/DOC/License.txt) is licensed under the GNU LGPL license.
@@ -33,4 +44,4 @@ Disables the CRT Shader (Recommended for Pixel and some other devices)
  
  This project uses [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer/blob/main/LICENSE)
  
- This project uses [LOVE](https://github.com/love2d/love/blob/main/license.txt)
+ This project uses [LÖVE](https://github.com/love2d/love/blob/main/license.txt)
