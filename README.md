@@ -29,7 +29,7 @@ Disables the CRT Shader (Recommended for Pixel and some other devices)
 
  ## Recogition (in no particular order)
  - [PGgamer2](https://github.com/PGgamer2) for many contributions (including language switching and dynamic FPS capping)
- - [TheCatRiX](https://github.com/TheCatRiX) for many contributions (include on-screen keyboard and save transferring)
+ - [TheCatRiX](https://github.com/TheCatRiX) for many contributions (including on-screen keyboard and save transferring)
  - [Blake502](https://github.com/Blake502) for initial release and continued support
  - Developers of [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer)
  - Developers of [LÖVE](https://love2d.org/)
