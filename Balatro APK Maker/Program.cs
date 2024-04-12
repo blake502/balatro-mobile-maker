@@ -12,10 +12,10 @@ namespace Balatro_APK_Maker
         const string javaCommand = "java -version";
         const string jre8installerLink = "https://javadl.oracle.com/webapps/download/AutoDL?BundleId=249553_4d245f941845490c91360409ecffb3b4";
         const string javaDownloadCommand = "explorer https://www.java.com/download/";
-        const string sevenzipLink = "http://smudge.codes/files/7za.exe";
+        const string sevenzipLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/7za.exe";
         const string apktoolLink = "https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.9.3.jar";
         const string uberapktoolLink = "https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar";
-        const string balatroApkPatchLink = "http://smudge.codes/files/Balatro-APK-Patch.zip";
+        const string balatroApkPatchLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/Balatro-APK-Patch.zip";
         const string love2dApkLink = "https://github.com/love2d/love-android/releases/download/11.5a/love-11.5-android-embed.apk";
 
         static bool verboseMode = false;
