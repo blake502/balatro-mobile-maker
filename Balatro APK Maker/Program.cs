@@ -515,7 +515,7 @@ existing_zip.close()");
 
             #region Android options
             #region Auto-install
-            if (File.Exists("balatro.apk") && askQuestion("Would you like to automaticaly install balatro.apk on your Android device?"))
+            if (androidBuild && File.Exists("balatro.apk") && askQuestion("Would you like to automaticaly install balatro.apk on your Android device?"))
             {
                 prepareAndroidPlatformTools();
 
@@ -525,7 +525,7 @@ existing_zip.close()");
             #endregion
 
             #region Save transfer
-            if (Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Anroid device?"))
+            if (androidBuild && Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Android device?"))
             {
                 log("Thanks to TheCatRiX for figuring out save transfers!");
 
