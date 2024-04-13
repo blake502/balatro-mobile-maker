@@ -10,6 +10,7 @@ namespace Balatro_APK_Maker
     {
 
         const string javaCommand = "java -version";
+        const string pythonCommand = "python --version 3>NUL";
         const string jre8installerLink = "https://javadl.oracle.com/webapps/download/AutoDL?BundleId=249553_4d245f941845490c91360409ecffb3b4";
         const string javaDownloadCommand = "explorer https://www.java.com/download/";
         const string sevenzipLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/7za.exe";
@@ -19,6 +20,7 @@ namespace Balatro_APK_Maker
         const string love2dApkLink = "https://github.com/love2d/love-android/releases/download/11.5a/love-11.5-android-embed.apk";
         const string platformToolsLink = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
         const string iosBaseLink = "https://smudge.codes/files/balatro-base.ipa";
+        const string pythonLink = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe";
 
         static bool verboseMode = false;
 
@@ -257,7 +259,7 @@ namespace Balatro_APK_Maker
                             if (commandLine(javaCommand).ExitCode != 0)
                             {
                                 //Critical error
-                                log("Java still not detected!");
+                                log("Java still not detected! Try to re-launch.");
                                 exit();
                             }
                         }
@@ -271,7 +273,7 @@ namespace Balatro_APK_Maker
                     }
                     #endregion
 
-                    #region All other tools
+                    #region Android tools
                     //Downloading tools. Handled in threads to allow simultaneous downloads
                     Thread[] downloadThreads = {
                         new Thread(() => { tryDownloadFile("7-Zip", sevenzipLink, "7za.exe"); }),
@@ -293,6 +295,43 @@ namespace Balatro_APK_Maker
 
                 if (iosBuild)
                 {
+                    #region Python
+                    //Check for Python
+                    log("Checking for Python...");
+                    if (commandLine(pythonCommand).ExitCode == 0)
+                        log("Python found.");
+                    else
+                    {
+                        log("Python not found, please install Python!");
+
+                        //Prompt user to automatically download install Python
+                        if (askQuestion("Would you like to automatically download and install Python?"))
+                        {
+                            //Download
+                            tryDownloadFile("Python", pythonLink, "python-installer.exe");
+                            //Install
+                            log("Installing Python...");
+                            commandLine("python-installer.exe /quiet");
+
+                            //Check again for Python
+                            if (commandLine(pythonCommand).ExitCode != 0)
+                            {
+                                //Critical error
+                                log("Python still not detected! Try to re-launch, or install Python manually from the Microsoft Store.");
+                                commandLine("python");
+                                exit();
+                            }
+                        }
+                        else
+                        {
+                            //User does not wish to automatically download and install Python
+                            //Take them to the download link instead. Halt program
+                            commandLine("python");
+                            exit();
+                        }
+                    }
+                    #endregion
+
                     #region iOS Tools
                     //Downloading tools. Handled in threads to allow simultaneous downloads
                     Thread[] downloadThreads = {
@@ -562,6 +601,7 @@ namespace Balatro_APK_Maker
                 commandLine("del balatro-aligned-debugSigned.apk.idsig");
                 commandLine("del balatro-unsigned.apk");
                 commandLine("del platform-tools.zip");
+                commandLine("del python-installer.exe");
                 commandLine("rmdir platform-tools\\ /S /Q");
                 commandLine("rmdir Balatro-APK-Patch\\ /S /Q");
                 commandLine("rmdir Balatro\\ /S /Q");
