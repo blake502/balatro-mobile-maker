@@ -33,6 +33,7 @@ Disables the CRT Shader (Recommended for Pixel and some other devices)
  - This script will automatically download [love-11.5-android-embed.apk](https://github.com/love2d/love-android/)
  - This script will automatically download [Balatro-APK-Patch](https://github.com/blake502/balatro-apk-maker/releases/tag/Additional-Tools-1.0)
  ### For iOS:
+ - This script can automatically download and install [Python](https://www.python.org/)
 - This script will automatically download [Balatro-IPA-Base](https://github.com/blake502/balatro-apk-maker/releases/tag/Additional-Tools-1.0)
 
  ## Recogition (in no particular order)

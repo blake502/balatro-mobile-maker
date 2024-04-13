@@ -19,7 +19,7 @@ namespace Balatro_APK_Maker
         const string balatroApkPatchLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/Balatro-APK-Patch.zip";
         const string love2dApkLink = "https://github.com/love2d/love-android/releases/download/11.5a/love-11.5-android-embed.apk";
         const string platformToolsLink = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
-        const string iosBaseLink = "https://smudge.codes/files/balatro-base.ipa";
+        const string iosBaseLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/balatro-base.ipa";
         const string pythonLink = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe";
 
         static bool verboseMode = false;
@@ -61,7 +61,7 @@ namespace Balatro_APK_Maker
         //This is hideous. But it works.
         static void applyPatches()
         {
-            log("Applying Android compatibilty patch...");
+            log("Applying mobile compatibilty patch...");
             //Android platform support
             applyPatch("globals.lua", "loadstring", @"    -- Removed 'loadstring' line which generated lua code that exited upon starting on mobile
     if love.system.getOS() == 'Android' or love.system.getOS() == 'iOS' then
@@ -230,7 +230,7 @@ namespace Balatro_APK_Maker
             if ((!File.Exists("balatro.apk") && !File.Exists("balatro.ipa")) || askQuestion("A previous build was found... Would you like to build again?"))
             {
                 androidBuild = askQuestion("Would you like to build for Android?");
-                iosBuild = !androidBuild && askQuestion("Would you like to build for iOS?");
+                iosBuild = !androidBuild && askQuestion("Would you like to build for iOS (experimental)?");
 
                 #region Download tools
                 if (androidBuild)
@@ -432,10 +432,9 @@ namespace Balatro_APK_Maker
 
                 if (iosBuild)
                 {
-                    #region Extract IPA
-                    log("Unpacking iOS Base...");
+                    #region Prepare IPA
+                    log("Preparing iOS Base...");
                     commandLine("move balatro-base.ipa balatro-base.zip");
-                    commandLine("7za x balatro-base.zip -obalatro-base");
                     #endregion
                 }
 
@@ -463,7 +462,7 @@ namespace Balatro_APK_Maker
                     commandLine("move Balatro\\balatro.zip balatro-apk\\assets\\game.love");
 
                 if (iosBuild)
-                    commandLine("move Balatro\\balatro.zip balatro-base\\Payload\\Balatro.app\\game.love");
+                    commandLine("move Balatro\\balatro.zip game.love");
                 #endregion
 
                 if (androidBuild)
@@ -501,8 +500,13 @@ namespace Balatro_APK_Maker
                 {
                     #region Packing IPA
                     log("Repacking iOS app...");
-                    commandLine("\"cd balatro-base && ..\\7za.exe a balatro.zip && cd ..\"");
-                    commandLine("move balatro-base\\balatro.zip balatro.ipa");
+                    File.WriteAllText("ios.py", @"import zipfile
+existing_zip = zipfile.ZipFile('balatro-base.zip', 'a')
+new_file_path = 'game.love'
+existing_zip.write(new_file_path, arcname='Payload/Balatro.app/game.love')
+existing_zip.close()");
+                    commandLine("python ios.py");
+                    commandLine("move balatro-base.zip balatro.ipa");
                     #endregion
                 }
                 log("Build successful!");
@@ -600,6 +604,8 @@ namespace Balatro_APK_Maker
                 commandLine("del balatro-unsigned.apk");
                 commandLine("del platform-tools.zip");
                 commandLine("del python-installer.exe");
+                commandLine("del ios.py");
+                commandLine("del game.love");
                 commandLine("rmdir platform-tools\\ /S /Q");
                 commandLine("rmdir Balatro-APK-Patch\\ /S /Q");
                 commandLine("rmdir Balatro\\ /S /Q");
