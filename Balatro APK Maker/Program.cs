@@ -17,9 +17,13 @@ namespace Balatro_APK_Maker
         const string uberapktoolLink = "https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar";
         const string balatroApkPatchLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/Balatro-APK-Patch.zip";
         const string love2dApkLink = "https://github.com/love2d/love-android/releases/download/11.5a/love-11.5-android-embed.apk";
-        const string platformTools = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
+        const string platformToolsLink = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
+        const string iosBaseLink = "https://smudge.codes/files/balatro-base.ipa";
 
         static bool verboseMode = false;
+
+        static bool androidBuild = false;
+        static bool iosBuild = false;
 
         //This applies a "patch" given a file path, a string from a line to be replaced, and the text with which to replace it.
         static bool applyPatch(string file, string lineContains, string replaceWith)
@@ -58,7 +62,7 @@ namespace Balatro_APK_Maker
             log("Applying Android compatibilty patch...");
             //Android platform support
             applyPatch("globals.lua", "loadstring", @"    -- Removed 'loadstring' line which generated lua code that exited upon starting on mobile
-    if love.system.getOS() == 'Android' then
+    if love.system.getOS() == 'Android' or love.system.getOS() == 'iOS' then
         self.F_DISCORD = true
         self.F_NO_ACHIEVEMENTS = true
         self.F_SOUND_THREAD = true
@@ -111,7 +115,12 @@ namespace Balatro_APK_Maker
             //Extra patches
 
             if (askQuestion("Would you like to apply the landscape orientation patch?"))
-                applyPatch("main.lua", "local os = love.system.getOS()", "    local os = love.system.getOS()\n    love.window.setMode(2, 1)");
+            {
+                if (androidBuild)
+                    applyPatch("main.lua", "local os = love.system.getOS()", "    local os = love.system.getOS()\n    love.window.setMode(2, 1, {highdpi = true})");
+                if (iosBuild)
+                    applyPatch("main.lua", "local os = love.system.getOS()", "    local os = love.system.getOS()\n    love.window.setMode(2, 1, {highdpi = true})");
+            }
 
             if (askQuestion("Would you like to apply the CRT shader disable patch? (Required for Pixel and some other devices!)"))
             {
@@ -193,7 +202,7 @@ namespace Balatro_APK_Maker
                 log("Platform tools not found...");
 
                 if (!File.Exists("platform-tools.zip"))
-                    tryDownloadFile("platform-tools", platformTools, "platform-tools.zip");
+                    tryDownloadFile("platform-tools", platformToolsLink, "platform-tools.zip");
 
                 if (!File.Exists("7za.exe"))
                     tryDownloadFile("7-Zip", sevenzipLink, "7za.exe");
@@ -218,63 +227,88 @@ namespace Balatro_APK_Maker
             verboseMode = askQuestion("Would you like to enable extra logging information?");
 
             //If balatro.apk already exists, ask before beginning build process again
-            if (!File.Exists("balatro.apk") || askQuestion("A previous build of balatro.apk was found... Would you like to build again?"))
+            if ((!File.Exists("balatro.apk") && !File.Exists("balatro.ipa")) || askQuestion("A previous build was found... Would you like to build again?"))
             {
+                androidBuild = askQuestion("Would you like to build for Android?");
+                iosBuild = !androidBuild && askQuestion("Would you like to build for iOS?");
+
                 #region Download tools
-                #region Java
-                //Check for Java
-                log("Checking for Java...");
-                if (commandLine(javaCommand).ExitCode == 0)
-                    log("Java found.");
-                else
+                if (androidBuild)
                 {
-                    log("Java not found, please install Java!");
-
-                    //Prompt user to automatically download install Java
-                    if (askQuestion("Would you like to automatically download and install Java?"))
+                    #region Java
+                    //Check for Java
+                    log("Checking for Java...");
+                    if (commandLine(javaCommand).ExitCode == 0)
+                        log("Java found.");
+                    else
                     {
-                        //Download
-                        tryDownloadFile("Java", jre8installerLink, "java-installer.exe");
-                        //Install
-                        log("Installing Java...");
-                        commandLine("java-installer.exe /s");
+                        log("Java not found, please install Java!");
 
-                        //Check again for Java
-                        if (commandLine(javaCommand).ExitCode != 0)
+                        //Prompt user to automatically download install Java
+                        if (askQuestion("Would you like to automatically download and install Java?"))
                         {
-                            //Critical error
-                            log("Java still not detected!");
+                            //Download
+                            tryDownloadFile("Java", jre8installerLink, "java-installer.exe");
+                            //Install
+                            log("Installing Java...");
+                            commandLine("java-installer.exe /s");
+
+                            //Check again for Java
+                            if (commandLine(javaCommand).ExitCode != 0)
+                            {
+                                //Critical error
+                                log("Java still not detected!");
+                                exit();
+                            }
+                        }
+                        else
+                        {
+                            //User does not wish to automatically download and install Java
+                            //Take them to the download link instead. Halt program
+                            commandLine(javaDownloadCommand);
                             exit();
                         }
                     }
-                    else
-                    {
-                        //User does not wish to automatically download and install Java
-                        //Take them to the download link instead. Halt program
-                        commandLine(javaDownloadCommand);
-                        exit();
-                    }
+                    #endregion
+
+                    #region All other tools
+                    //Downloading tools. Handled in threads to allow simultaneous downloads
+                    Thread[] downloadThreads = {
+                        new Thread(() => { tryDownloadFile("7-Zip", sevenzipLink, "7za.exe"); }),
+                        new Thread(() => { tryDownloadFile("APKTool", apktoolLink, "apktool.jar"); }),
+                        new Thread(() => { tryDownloadFile("uber-apk-signer", uberapktoolLink, "uber-apk-signer.jar"); }),
+                        new Thread(() => { tryDownloadFile("Balatro-APK-Patch", balatroApkPatchLink, "Balatro-APK-Patch.zip"); }),
+                        new Thread(() => { tryDownloadFile("Love2D APK", love2dApkLink, "love-11.5-android-embed.apk"); })
+                    };
+
+                    //Start all the downloads
+                    for (int i = 0; i < downloadThreads.Length; i++)
+                        downloadThreads[i].Start();
+
+                    //Wait for all the downloads to complete
+                    for (int i = 0; i < downloadThreads.Length; i++)
+                        downloadThreads[i].Join();
+                    #endregion
                 }
-                #endregion
 
-                #region All other tools
-                //Downloading tools. Handled in threads to allow simultaneous downloads
-                Thread[] downloadThreads = {
-                    new Thread(() => { tryDownloadFile("7-Zip", sevenzipLink, "7za.exe"); }),
-                    new Thread(() => { tryDownloadFile("APKTool", apktoolLink, "apktool.jar"); }),
-                    new Thread(() => { tryDownloadFile("uber-apk-signer", uberapktoolLink, "uber-apk-signer.jar"); }),
-                    new Thread(() => { tryDownloadFile("Balatro-APK-Patch", balatroApkPatchLink, "Balatro-APK-Patch.zip"); }),
-                    new Thread(() => { tryDownloadFile("Love2D APK", love2dApkLink, "love-11.5-android-embed.apk"); })
-                };
+                if (iosBuild)
+                {
+                    #region iOS Tools
+                    //Downloading tools. Handled in threads to allow simultaneous downloads
+                    Thread[] downloadThreads = {
+                        new Thread(() => { tryDownloadFile("7-Zip", sevenzipLink, "7za.exe"); }),
+                        new Thread(() => { tryDownloadFile("iOS Base", iosBaseLink, "balatro-base.ipa"); })
+                    };
 
-                //Start all the downloads
-                for (int i = 0; i < downloadThreads.Length; i++)
-                    downloadThreads[i].Start();
+                    //Start all the downloads
+                    for (int i = 0; i < downloadThreads.Length; i++)
+                        downloadThreads[i].Start();
 
-                //Wait for all the downloads to complete
-                for (int i = 0; i < downloadThreads.Length; i++)
-                    downloadThreads[i].Join();
-                #endregion
+                    //Wait for all the downloads to complete
+                    for (int i = 0; i < downloadThreads.Length; i++)
+                        downloadThreads[i].Join();
+                    #endregion
+                }
                 #endregion
 
                 #region Prepare workspace
@@ -314,51 +348,63 @@ namespace Balatro_APK_Maker
                 }
                 #endregion
 
-                #region Extract APK
-                log("Unpacking Love2D APK with APK Tool...");
-                if (Directory.Exists("balatro-apk"))
+                if (androidBuild)
                 {
-                    //Delete the balatro-apk folder if it already exists
-                    log("balatro-apk directory already exists! Deleting balatro-apk directory...");
-                    commandLine("rmdir balatro-apk\\ /S /Q");
+                    #region Extract APK
+                    log("Unpacking Love2D APK with APK Tool...");
+                    if (Directory.Exists("balatro-apk"))
+                    {
+                        //Delete the balatro-apk folder if it already exists
+                        log("balatro-apk directory already exists! Deleting balatro-apk directory...");
+                        commandLine("rmdir balatro-apk\\ /S /Q");
+                    }
+
+                    //Unpack Love2D APK
+                    commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
+
+                    //Check for failure
+                    if (!Directory.Exists("balatro-apk"))
+                    {
+                        log("Failed to unpack Love2D APK with APK Tool!");
+                        exit();
+                    }
+                    #endregion
+
+                    #region APK patch
+                    log("Extracting patch zip...");
+                    if (Directory.Exists("Balatro-APK-Patch"))
+                    {
+                        log("Balatro-APK-Patch directory already exists! Deleting Balatro-APK-Patch directory...");
+                        commandLine("rmdir Balatro-APK-Patch\\ /S /Q");
+                    }
+
+                    //Extract Balatro-APK-Patch
+                    commandLine("7za.exe  x Balatro-APK-Patch.zip -oBalatro-APK-Patch");
+
+                    if (!Directory.Exists("Balatro-APK-Patch"))
+                    {
+                        log("Failed to extract Balatro-APK-Patch");
+                        exit();
+                    }
+
+                    //Base APK patch
+                    log("Patching APK folder...");
+                    commandLine("xcopy \"Balatro-APK-Patch\\\" \"balatro-apk\\\" /E /H /Y /V");
+                    #endregion
                 }
 
-                //Unpack Love2D APK
-                commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
-
-                //Check for failure
-                if (!Directory.Exists("balatro-apk"))
+                if (iosBuild)
                 {
-                    log("Failed to unpack Love2D APK with APK Tool!");
-                    exit();
+                    #region Extract IPA
+                    log("Unpacking iOS Base...");
+                    commandLine("move balatro-base.ipa balatro-base.zip");
+                    commandLine("7za x balatro-base.zip -obalatro-base");
+                    #endregion
                 }
+
                 #endregion
 
-                #region Extract APK patch
-                log("Extracting patch zip...");
-                if (Directory.Exists("Balatro-APK-Patch"))
-                {
-                    log("Balatro-APK-Patch directory already exists! Deleting Balatro-APK-Patch directory...");
-                    commandLine("rmdir Balatro-APK-Patch\\ /S /Q");
-                }
-
-                //Extract Balatro-APK-Patch
-                commandLine("7za.exe  x Balatro-APK-Patch.zip -oBalatro-APK-Patch");
-
-                if (!Directory.Exists("Balatro-APK-Patch"))
-                {
-                    log("Failed to extract Balatro-APK-Patch");
-                    exit();
-                }
-                #endregion
-                #endregion
-
-                #region Patches
-                //Base APK patch
-                log("Patching APK folder...");
-                commandLine("xcopy \"Balatro-APK-Patch\\\" \"balatro-apk\\\" /E /H /Y /V");
-
-                //Balatro code patches
+                #region Patch
                 log("Patching...");
                 applyPatches();
                 #endregion
@@ -376,46 +422,59 @@ namespace Balatro_APK_Maker
                 }
 
                 log("Moving archive...");
-                commandLine("move Balatro\\balatro.zip balatro-apk\\assets\\game.love");
+                if (androidBuild)
+                    commandLine("move Balatro\\balatro.zip balatro-apk\\assets\\game.love");
+
+                if (iosBuild)
+                    commandLine("move Balatro\\balatro.zip balatro-base\\Payload\\Balatro.app\\game.love");
                 #endregion
 
-                #region APK
-                #region Packing
-                log("Repacking APK...");
-                commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" b -o balatro.apk balatro-apk");
-
-                if (!File.Exists("balatro.apk"))
+                if (androidBuild)
                 {
-                    log("Failed to pack Balatro apk!");
-                    exit();
+                    #region Packing APK
+                    log("Repacking APK...");
+                    commandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" b -o balatro.apk balatro-apk");
+
+                    if (!File.Exists("balatro.apk"))
+                    {
+                        log("Failed to pack Balatro apk!");
+                        exit();
+                    }
+                    #endregion
+
+                    #region Signing APK
+                    log("Signing APK...");
+                    commandLine("java -jar uber-apk-signer.jar -a balatro.apk");
+
+                    if (!File.Exists("balatro-aligned-debugSigned.apk"))
+                    {
+                        log("Failed to sign APK!");
+                        exit();
+                    }
+
+                    log("Renaming unsigned apk...");
+                    commandLine("move balatro.apk balatro-unsigned.apk");
+
+                    log("Renaming signed apk...");
+                    commandLine("move balatro-aligned-debugSigned.apk balatro.apk");
+                    #endregion
                 }
-                #endregion
 
-                #region Signing
-                log("Signing APK...");
-                commandLine("java -jar uber-apk-signer.jar -a balatro.apk");
-
-                if (!File.Exists("balatro-aligned-debugSigned.apk"))
+                if (iosBuild)
                 {
-                    log("Failed to sign APK!");
-                    exit();
+                    #region Packing IPA
+                    log("Repacking iOS app...");
+                    commandLine("\"cd balatro-base && ..\\7za.exe a balatro.zip && cd ..\"");
+                    commandLine("move balatro-base\\balatro.zip balatro.ipa");
+                    #endregion
                 }
-
-                log("Renaming unsigned apk...");
-                commandLine("move balatro.apk balatro-unsigned.apk");
-
-                log("Renaming signed apk...");
-                commandLine("move balatro-aligned-debugSigned.apk balatro.apk");
-                #endregion
-
                 log("Build successful!");
-                #endregion
                 #endregion
             }
 
             #region Android options
             #region Auto-install
-            if (askQuestion("Would you like to automaticaly install balatro.apk on your Android device?"))
+            if (File.Exists("balatro.apk") && askQuestion("Would you like to automaticaly install balatro.apk on your Android device?"))
             {
                 prepareAndroidPlatformTools();
 
