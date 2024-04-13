@@ -110,8 +110,11 @@ namespace Balatro_APK_Maker
 
             //Extra patches
 
-            if (askQuestion("Would you like to apply the landscape orientation patch?"))
-                applyPatch("main.lua", "local os = love.system.getOS()", "    local os = love.system.getOS()\n    love.window.setMode(2, 1, {highdpi = true})");
+            if (askQuestion("Would you like to apply the landscape orientation patch (required for high DPI)?"))
+            {
+                bool highDPI = askQuestion("Would you like to apply the high DPI patch (recommended for devices with high resolution)?");
+                applyPatch("main.lua", "local os = love.system.getOS()", "    local os = love.system.getOS()\n    love.window.setMode(2, 1" + (highDPI ? ", {highdpi = true}" : "") + ")");
+            }
 
             if (askQuestion("Would you like to apply the CRT shader disable patch? (Required for Pixel and some other devices!)"))
             {
