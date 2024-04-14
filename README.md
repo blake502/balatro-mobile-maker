@@ -1,7 +1,11 @@
 # Balatro APK Maker
 
 This goal of this script is to allow *Balatro* fans to play *Balatro* on their mobile devices before the official release. This script provides a **NON-PIRACY** avenue for players to do so, by converting their *Steam* version of *Balatro* to a mobile app. Balatro APK Maker also supports automatically transferring your saves from your *Steam* copy to your *Android* device.
+
 While the name is Balatro "APK" Maker, iOS support exists-- But is experimental!
+
+Mods are not officially supported, [but they will probably work if you transfer your saves from a modded system](https://github.com/blake502/balatro-apk-maker/issues/11).
+
 Keep in mind that Balatro APK Maker is still in beta! Please report any bugs you encouter in the [issues section](https://github.com/blake502/balatro-apk-maker/issues). If you encounter bugs with the latest release, try the previous release.
 
 ## Quick Start Guide
