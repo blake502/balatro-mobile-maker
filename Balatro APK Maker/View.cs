@@ -16,11 +16,12 @@ internal class View
 
     private bool _androidBuild;
     private bool _iosBuild;
-    
+
     /// <summary>
     /// Start CLI operation.
     /// </summary>
-    public void Begin() {
+    public void Begin()
+    {
         bool exeProvided = File.Exists("Balatro.exe");
 
         Log("====Balatro APK Maker====\n7-Zip is licensed under the GNU LGPL license. Please visit: www.7-zip.org\n\n");
@@ -465,7 +466,7 @@ existing_zip.close()");
     /// Prompts the user to select which patches they want, then applies them.
     /// </summary>
     // This is hideous, but it works.
-     void ApplyPatches()
+    void ApplyPatches()
     {
         Log("Applying mobile compatibilty patch...");
         //Android platform support
@@ -547,14 +548,14 @@ existing_zip.close()");
             ApplyPatch("conf.lua", "t.window.width = 0", "    t.window.width = 0\n    t.externalstorage = true");
 #pragma warning restore CS0162 // Unreachable code detected
     }
-        
+
     /// <summary>
     /// Attempts to download a file if it does not exist
     /// </summary>
     /// <param name="name">Friendly name for file (for logging)</param>
     /// <param name="link">Download URL</param>
     /// <param name="fileName">File path to save to</param>
-    private  void TryDownloadFile(string name, string link, string fileName)
+    private void TryDownloadFile(string name, string link, string fileName)
     {
         //If the file does not already exist
         if (!File.Exists(fileName))
@@ -590,7 +591,7 @@ existing_zip.close()");
     // This saves me from writing Console.WriteLine a million times
     // ReSharper disable once GrammarMistakeInComment
     // There's probably a better way to make an alias in C#. Oh well
-     void Log(string text)
+    void Log(string text)
     {
         Console.WriteLine(text);
     }
@@ -598,7 +599,7 @@ existing_zip.close()");
     /// <summary>
     /// Exits the application after the user presses any key
     /// </summary>
-     void Exit()
+    void Exit()
     {
         Log("Press any key to exit...");
         Console.ReadKey();
@@ -610,7 +611,7 @@ existing_zip.close()");
     /// </summary>
     /// <param name="question">Prompt for the user</param>
     /// <returns>Status of prompt - true for 'Y', false for 'N'</returns>
-     bool AskQuestion(string question)
+    bool AskQuestion(string question)
     {
         string input = null;
         do
@@ -623,11 +624,11 @@ existing_zip.close()");
 
         return input == "y";
     }
-        
+
     /// <summary>
     /// Prepare Android platform-tools, and prompt user to enable USB debugging
     /// </summary>
-     void PrepareAndroidPlatformTools()
+    void PrepareAndroidPlatformTools()
     {
         //Check whether they already exist
         if (!Directory.Exists("platform-tools"))
@@ -648,26 +649,26 @@ existing_zip.close()");
         while (!AskQuestion("Is your Android device connected to the host with USB Debugging enabled?"))
             Log("Please enable USB Debugging on your Android device, and connect it to the host.");
     }
-    
+
     /// <summary>
     /// Prints output (or errors) if verbose mode is enabled
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private  void ProcessOutputHandler(object sender, DataReceivedEventArgs e)
+    private void ProcessOutputHandler(object sender, DataReceivedEventArgs e)
     {
         if (_verboseMode && e.Data != null)
             Log("    " + e.Data);
     }
-    
-    
+
+
     /// <summary>
     /// Starts process using the platform's shell
     /// Currently this is restricted to Windows.
     /// </summary>
     /// <param name="args">Command to pass to the shell</param>
     /// <returns>Process, post finishing.</returns>
-     Process CommandLine(string args)
+    Process CommandLine(string args)
     {
         //Create a new cmd process
         Process commandLineProcess = new Process();
