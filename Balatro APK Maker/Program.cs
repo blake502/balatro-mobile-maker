@@ -515,7 +515,7 @@ existing_zip.close()");
 
             #region Android options
             #region Auto-install
-            if (File.Exists("balatro.apk") && askQuestion("Would you like to automaticaly install balatro.apk on your Android device?"))
+            if (!iosBuild && File.Exists("balatro.apk") && askQuestion("Would you like to automaticaly install balatro.apk on your Android device?"))
             {
                 prepareAndroidPlatformTools();
 
@@ -525,7 +525,7 @@ existing_zip.close()");
             #endregion
 
             #region Save transfer
-            if (Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Android device?"))
+            if (!iosBuild && File.Exists("balatro.apk") && Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Android device?"))
             {
                 log("Thanks to TheCatRiX for figuring out save transfers!");
 
@@ -536,7 +536,7 @@ existing_zip.close()");
                 commandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files");
                 commandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files/save");
                 commandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files/save/game");
-                commandLine("cd platform-tools && cd platform-tools && adb push %AppData%/Balatro/. /data/local/tmp/balatro/files/save/game && adb shell am force-stop com.unofficial.balatro && adb shell run-as com.unofficial.balatro cp -r /data/local/tmp/balatro/files . && adb shell rm -r /data/local/tmp/balatro && adb kill-server");
+                commandLine("cd platform-tools && cd platform-tools && adb push \"%AppData%/Balatro/.\" /data/local/tmp/balatro/files/save/game && adb shell am force-stop com.unofficial.balatro && adb shell run-as com.unofficial.balatro cp -r /data/local/tmp/balatro/files . && adb shell rm -r /data/local/tmp/balatro && adb kill-server");
 
             }
             else
@@ -551,8 +551,8 @@ existing_zip.close()");
 
                     log("Backing up your files...");
                     commandLine("xcopy \"%appdata%\\Balatro\\\" \"%appdata%\\BalatroBACKUP\\\" /E /H /Y /V");
-                    commandLine("rmdir %appdata%\\Balatro\\ /S /Q");
-                    commandLine("mkdir %appdata%\\Balatro\\");
+                    commandLine("rmdir \"%appdata%\\Balatro\\\" /S /Q");
+                    commandLine("mkdir \"%appdata%\\Balatro\\\"");
 
                     //This sure isn't pretty, but it should work!
                     commandLine("cd platform-tools && cd platform-tools && adb shell rm -r /data/local/tmp/balatro");
