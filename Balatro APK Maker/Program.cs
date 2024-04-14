@@ -525,7 +525,7 @@ existing_zip.close()");
             #endregion
 
             #region Save transfer
-            if (Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Anroid device?"))
+            if (Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && askQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Android device?"))
             {
                 log("Thanks to TheCatRiX for figuring out save transfers!");
 
