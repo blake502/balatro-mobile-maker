@@ -24,6 +24,8 @@ Please review the **Notes** section before you begin.
 Caps FPS to a desired number (Or to the device's native refresh rate-- recommended for battery performance)
 - **Landscape Orientation**
 Locks the game to landscape orientation (Recommended, since portrait orientation does not behave very well)
+- **High DPI**
+Enables [High DPI graphics mode in Love](https://love2d.org/wiki/love.window.setMode) (Recommended for iOS)
 - **CRT Shader Disable**
 Disables the CRT Shader (Recommended for Pixel and some other devices)
 
