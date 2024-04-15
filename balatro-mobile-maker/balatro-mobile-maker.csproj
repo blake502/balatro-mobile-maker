@@ -5,12 +5,4 @@
     <PublishSingleFile>true</PublishSingleFile>
     <RootNamespace>balatro_mobile_maker</RootNamespace>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="publish\**" />
-    <EmbeddedResource Remove="publish\**" />
-    <None Remove="publish\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="publish.bat" />
-  </ItemGroup>
 </Project>
