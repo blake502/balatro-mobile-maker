@@ -1,17 +1,15 @@
-# Balatro APK Maker
+# Balatro Mobile Maker
 
 This goal of this script is to allow *Balatro* fans to play *Balatro* on their mobile devices before the official release. This script provides a **NON-PIRACY** avenue for players to do so, by converting their *Steam* version of *Balatro* to a mobile app. Balatro APK Maker also supports automatically transferring your saves from your *Steam* copy to your *Android* device.
 
-While the name is Balatro "APK" Maker, iOS support exists-- But is experimental!
+Mods are not officially supported, [but they will probably work if you transfer your saves from a modded system](https://github.com/blake502/balatro-mobile-maker/issues/11).
 
-Mods are not officially supported, [but they will probably work if you transfer your saves from a modded system](https://github.com/blake502/balatro-apk-maker/issues/11).
-
-Keep in mind that Balatro APK Maker is still in beta! Please report any bugs you encouter in the [issues section](https://github.com/blake502/balatro-apk-maker/issues). If you encounter bugs with the latest release, try the previous release.
+Keep in mind that Balatro Mobile Maker is still in beta! Please report any bugs you encouter in the [issues section](https://github.com/blake502/balatro-mobile-maker/issues). If you encounter bugs with the latest release, try the previous release.
 
 ## Quick Start Guide
 Please review the **Notes** section before you begin.
- - Download or compile [**balatro-apk-maker.exe**](https://github.com/blake502/balatro-apk-maker/releases).
- - Run **balatro-apk-maker.exe**.
+ - Download or compile [**balatro-mobile-maker.exe**](https://github.com/blake502/balatro-mobile-maker/releases).
+ - Run **balatro-mobile-maker.exe**.
  - Follow the prompts to apply optional patches. If you're unsure, always select "Y".
  ### For Android:
  - Copy the resulting **balatro.apk** to your Android device, or allow the program to automatically install using [USB Debugging](https://developer.android.com/studio/debug/dev-options).
@@ -30,17 +28,17 @@ Enables [High DPI graphics mode in Love](https://love2d.org/wiki/love.window.set
 Disables the CRT Shader (Recommended for Pixel and some other devices)
 
 ## Notes
- - This script assumes that **Balatro.exe** is located in the default *Steam* directory (`C:\Program Files (x86)\Steam\steamapps\common\Balatro\Balatro.exe`). If it is not, simply copy your **Balatro.exe** to the same folder as **balatro-apk-maker.exe**
+ - This script assumes that **Balatro.exe** is located in the default *Steam* directory (`C:\Program Files (x86)\Steam\steamapps\common\Balatro\Balatro.exe`). If it is not, simply copy your **Balatro.exe** to the same folder as **balatro-mobile-maker.exe**
  - This script will automatically download [7-Zip](https://www.7-zip.org/)
  ### For Android:
  - This script can automatically download and install [Java](https://www.java.com/en/download/)
  - This script will automatically download [APK Tool](https://apktool.org/)
  - This script will automatically download [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer/)
  - This script will automatically download [love-11.5-android-embed.apk](https://github.com/love2d/love-android/)
- - This script will automatically download [Balatro-APK-Patch](https://github.com/blake502/balatro-apk-maker/releases/tag/Additional-Tools-1.0)
+ - This script will automatically download [Balatro-APK-Patch](https://github.com/blake502/balatro-mobile-maker/releases/tag/Additional-Tools-1.0)
  ### For iOS:
  - This script can automatically download and install [Python](https://www.python.org/)
-- This script will automatically download [Balatro-IPA-Base](https://github.com/blake502/balatro-apk-maker/releases/tag/Additional-Tools-1.0)
+- This script will automatically download [Balatro-IPA-Base](https://github.com/blake502/balatro-mobile-maker/releases/tag/Additional-Tools-1.0)
 
  ## Recogition (in no particular order)
  - [PGgamer2](https://github.com/PGgamer2) for many contributions (including language switching and dynamic FPS capping)

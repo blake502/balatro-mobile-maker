@@ -1,10 +1,12 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Threading;
+using static balatro_mobile_maker.Constants;
 
-namespace Balatro_APK_Maker;
+
+namespace balatro_mobile_maker;
 
 /// <summary>
 /// Command line UI for Balatro APK Maker.
@@ -42,7 +44,7 @@ internal class View
                 #region Java
                 //Check for Java
                 Log("Checking for Java...");
-                if (CommandLine(Constants.JavaCommand).ExitCode == 0)
+                if (CommandLine(JavaCommand).ExitCode == 0)
                     Log("Java found.");
                 else
                 {
@@ -52,13 +54,13 @@ internal class View
                     if (AskQuestion("Would you like to automatically download and install Java?"))
                     {
                         //Download
-                        TryDownloadFile("Java", Constants.Jre8InstallerLink, "java-installer.exe");
+                        TryDownloadFile("Java", Jre8InstallerLink, "java-installer.exe");
                         //Install
                         Log("Installing Java...");
                         CommandLine("java-installer.exe /s");
 
                         //Check again for Java
-                        if (CommandLine(Constants.JavaCommand).ExitCode != 0)
+                        if (CommandLine(JavaCommand).ExitCode != 0)
                         {
                             //Critical error
                             Log("Java still not detected! Try to re-launch.");
@@ -69,7 +71,7 @@ internal class View
                     {
                         //User does not wish to automatically download and install Java
                         //Take them to the download link instead. Halt program
-                        CommandLine(Constants.JavaDownloadCommand);
+                        CommandLine(JavaDownloadCommand);
                         Exit();
                     }
                 }
@@ -79,11 +81,11 @@ internal class View
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
-                    new Thread(() => { TryDownloadFile("7-Zip", Constants.SevenzipLink, "7za.exe"); }),
-                    new Thread(() => { TryDownloadFile("APKTool", Constants.ApktoolLink, "apktool.jar"); }),
-                    new Thread(() => { TryDownloadFile("uber-apk-signer", Constants.UberapktoolLink, "uber-apk-signer.jar"); }),
-                    new Thread(() => { TryDownloadFile("Balatro-APK-Patch", Constants.BalatroApkPatchLink, "Balatro-APK-Patch.zip"); }),
-                    new Thread(() => { TryDownloadFile("Love2D APK", Constants.Love2dApkLink, "love-11.5-android-embed.apk"); })
+                    new Thread(() => { TryDownloadFile("7-Zip", SevenzipLink, "7za.exe"); }),
+                    new Thread(() => { TryDownloadFile("APKTool", ApktoolLink, "apktool.jar"); }),
+                    new Thread(() => { TryDownloadFile("uber-apk-signer", UberapktoolLink, "uber-apk-signer.jar"); }),
+                    new Thread(() => { TryDownloadFile("Balatro-APK-Patch", BalatroApkPatchLink, "Balatro-APK-Patch.zip"); }),
+                    new Thread(() => { TryDownloadFile("Love2D APK", Love2dApkLink, "love-11.5-android-embed.apk"); })
                 ];
 
                 //Start all the downloads
@@ -100,7 +102,7 @@ internal class View
                 #region Python
                 //Check for Python
                 Log("Checking for Python...");
-                if (CommandLine(Constants.PythonCommand).ExitCode == 0)
+                if (CommandLine(PythonCommand).ExitCode == 0)
                     Log("Python found.");
                 else
                 {
@@ -110,13 +112,13 @@ internal class View
                     if (AskQuestion("Would you like to automatically download and install Python?"))
                     {
                         //Download
-                        TryDownloadFile("Python", Constants.PythonLink, "python-installer.exe");
+                        TryDownloadFile("Python", PythonLink, "python-installer.exe");
                         //Install
                         Log("Installing Python...");
                         CommandLine("python-installer.exe /quiet");
 
                         //Check again for Python
-                        if (CommandLine(Constants.PythonCommand).ExitCode != 0)
+                        if (CommandLine(PythonCommand).ExitCode != 0)
                         {
                             //Critical error
                             Log("Python still not detected! Try to re-launch, or install Python manually from the Microsoft Store.");
@@ -138,8 +140,8 @@ internal class View
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
-                    new Thread(() => { TryDownloadFile("7-Zip", Constants.SevenzipLink, "7za.exe"); }),
-                    new Thread(() => { TryDownloadFile("iOS Base", Constants.IosBaseLink, "balatro-base.ipa"); })
+                    new Thread(() => { TryDownloadFile("7-Zip", SevenzipLink, "7za.exe"); }),
+                    new Thread(() => { TryDownloadFile("iOS Base", IosBaseLink, "balatro-base.ipa"); })
                 ];
 
                 //Start all the downloads
@@ -636,10 +638,10 @@ existing_zip.close()");
             Log("Platform tools not found...");
 
             if (!File.Exists("platform-tools.zip"))
-                TryDownloadFile("platform-tools", Constants.PlatformToolsLink, "platform-tools.zip");
+                TryDownloadFile("platform-tools", PlatformToolsLink, "platform-tools.zip");
 
             if (!File.Exists("7za.exe"))
-                TryDownloadFile("7-Zip", Constants.SevenzipLink, "7za.exe");
+                TryDownloadFile("7-Zip", SevenzipLink, "7za.exe");
 
             Log("Extracting platform-tools...");
             CommandLine("7za x platform-tools.zip -oplatform-tools");

@@ -1,4 +1,5 @@
-namespace Balatro_APK_Maker;
+﻿namespace balatro_mobile_maker;
+
 
 /// <summary>
 /// Main entry point for the program.

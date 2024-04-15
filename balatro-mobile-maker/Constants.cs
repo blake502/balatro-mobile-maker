@@ -1,4 +1,4 @@
-namespace Balatro_APK_Maker;
+﻿namespace balatro_mobile_maker;
 
 /// <summary>
 /// Constant values.
@@ -18,4 +18,4 @@ internal static class Constants
     public const string PlatformToolsLink = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
     public const string IosBaseLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/balatro-base.ipa";
     public const string PythonLink = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe";
-}
+} 
