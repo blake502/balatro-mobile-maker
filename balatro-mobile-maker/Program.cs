@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Threading;
 
-namespace Balatro_APK_Maker
+namespace balatro_mobile_maker
 {
     internal class Program
     {
@@ -13,13 +13,13 @@ namespace Balatro_APK_Maker
         const string pythonCommand = "python --version 3>NUL";
         const string jre8installerLink = "https://javadl.oracle.com/webapps/download/AutoDL?BundleId=249553_4d245f941845490c91360409ecffb3b4";
         const string javaDownloadCommand = "explorer https://www.java.com/download/";
-        const string sevenzipLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/7za.exe";
+        const string sevenzipLink = "https://github.com/blake502/balatro-mobile-maker/releases/download/Additional-Tools-1.0/7za.exe";
         const string apktoolLink = "https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.9.3.jar";
         const string uberapktoolLink = "https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar";
-        const string balatroApkPatchLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/Balatro-APK-Patch.zip";
+        const string balatroApkPatchLink = "https://github.com/blake502/balatro-mobile-maker/releases/download/Additional-Tools-1.0/Balatro-APK-Patch.zip";
         const string love2dApkLink = "https://github.com/love2d/love-android/releases/download/11.5a/love-11.5-android-embed.apk";
         const string platformToolsLink = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
-        const string iosBaseLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/balatro-base.ipa";
+        const string iosBaseLink = "https://github.com/blake502/balatro-mobile-maker/releases/download/Additional-Tools-1.0/balatro-base.ipa";
         const string pythonLink = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe";
 
         static bool verboseMode = false;
@@ -79,7 +79,8 @@ namespace Balatro_APK_Maker
             if (askQuestion("Would you like to apply the FPS cap patch?"))
             {
                 int fps = -1;
-                do {
+                do
+                {
                     log("Please enter your desired FPS cap (or leave blank to set to device refresh rate):");
                     string input = Console.ReadLine().ToLower();
 
@@ -130,7 +131,7 @@ namespace Balatro_APK_Maker
 
             //Disabled, since this seems to actually be the HARDER way of doing this
             //I'll leave it in the code base for now though...
-            if (false && askQuestion("Would you like to apply the accessible saves patch?")) 
+            if (false && askQuestion("Would you like to apply the accessible saves patch?"))
                 applyPatch("conf.lua", "t.window.width = 0", "    t.window.width = 0\n    t.externalstorage = true");
         }
 
@@ -183,7 +184,8 @@ namespace Balatro_APK_Maker
         static bool askQuestion(string question)
         {
             string input = null;
-            do {
+            do
+            {
                 if (input != null)
                     log("Enter either 'Y' or 'N'!");
                 log(question + " (y/n):");
@@ -220,7 +222,7 @@ namespace Balatro_APK_Maker
         {
             bool exeProvided = File.Exists("Balatro.exe");
 
-            log("====Balatro APK Maker====\n7-Zip is licensed under the GNU LGPL license. Please visit: www.7-zip.org\n\n");
+            log("====Balatro Mobile Maker====\n7-Zip is licensed under the GNU LGPL license. Please visit: www.7-zip.org\n\n");
 
             //Initial prompts
             bool cleanup = askQuestion("Would you like to automatically clean up once complete?");
@@ -646,18 +648,18 @@ existing_zip.close()");
 
             //On exit
             commandLineProccess.Exited += (object sender, EventArgs e) =>
+            {
+                //Check for errors
+                if (commandLineProccess.ExitCode != 0)
                 {
-                    //Check for errors
-                    if (commandLineProccess.ExitCode != 0)
-                    {
-                        //Error occurred
-                        log("An unexpected error occurred!");
-                        if (!verboseMode)
-                            log("Try running in verbose mode to determine the cause of the error.");
-                    }
-                    else
-                        log("\n");
-                };
+                    //Error occurred
+                    log("An unexpected error occurred!");
+                    if (!verboseMode)
+                        log("Try running in verbose mode to determine the cause of the error.");
+                }
+                else
+                    log("\n");
+            };
 
             //Return the process
             return commandLineProccess;
