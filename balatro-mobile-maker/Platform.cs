@@ -30,6 +30,20 @@ internal class Platform
     {
         if(isWindows)
             CommandLine("platform-tools\\platform-tools\\adb.exe " + args);
+
+        if (isOSX) { /*...*/ }
+
+        if (isLinux) { /*...*/ }
+    }
+
+    public static void usePython(string args)
+    {
+        if (isWindows)
+            CommandLine("python\\python.exe " + args);
+
+        if (isOSX) { /*...*/ }
+
+        if (isLinux) { /*...*/ }
     }
 
     public static string getGameSaveLocation()
@@ -47,6 +61,10 @@ internal class Platform
     {
         if(isWindows)
             return File.Exists("Balatro.exe");
+
+        if (isOSX) { /*...*/ }
+
+        if (isLinux) { /*...*/ }
 
         return false;
     }

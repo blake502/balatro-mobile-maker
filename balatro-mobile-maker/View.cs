@@ -280,7 +280,8 @@ internal class View
 
                 Log("Repacking iOS app...");
                 File.WriteAllText("ios.py", Constants.PythonScript);
-                CommandLine("python\\python ios.py");
+                Tools.useTool(ProcessTools.Python, "ios.py");
+
                 CommandLine("move balatro-base.zip balatro.ipa");
                 #endregion
             }

@@ -22,7 +22,10 @@ internal class Tools
         {
             case ProcessTools.ADB:
                 Platform.useADB(args);
-            break;
+                break;
+            case ProcessTools.Python:
+                Platform.usePython(args);
+                break;
         }
     }
 }
