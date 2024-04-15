@@ -29,7 +29,7 @@ internal class Platform
     public static void useADB(string args)
     {
         if(isWindows)
-            CommandLine("platform-tools\\platform-tools\\adb.exe" + args);
+            CommandLine("platform-tools\\platform-tools\\adb.exe " + args);
     }
 
     public static string getGameSaveLocation()

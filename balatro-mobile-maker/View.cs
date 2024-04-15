@@ -115,7 +115,7 @@ internal class View
                     if (AskQuestion("Would you like to automatically download and install Python?"))
                     {
                         //Download
-                        TryDownloadFile("Python", PythonX64Link, "python-installer.exe");
+                        TryDownloadFile("Python", PythonWinX64Link, "python-installer.exe");
                         //Install
                         Log("Installing Python...");
                         CommandLine("python-installer.exe /quiet");
