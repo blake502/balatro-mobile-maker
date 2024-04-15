@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 using System.Threading;
+using System.IO;
 using static balatro_mobile_maker.Constants;
 
 
@@ -247,7 +247,7 @@ internal class View
 
             #region Patch
             Log("Patching...");
-            ApplyPatches();
+            Patching.Begin();
             #endregion
 
             #region Building
@@ -425,138 +425,6 @@ existing_zip.close()");
     }
 
     /// <summary>
-    /// Apply a "patch" given a file path, a string from a line to be replaced, and the text with which to replace it.
-    /// </summary>
-    /// <param name="file">File to patch</param>
-    /// <param name="lineContains">Line to be replaced</param>
-    /// <param name="replaceWith">New contents for the line</param>
-    /// <returns></returns>
-    // We wish to keep the return type, incase we want to make use of this later.
-    // ReSharper disable once UnusedMethodReturnValue.Local
-    bool ApplyPatch(string file, string lineContains, string replaceWith)
-    {
-        //Read the file
-        Log("Loading " + file + " file...");
-        string[] loadedFile = File.ReadAllLines("Balatro\\" + file);
-
-        //Search for the line to replace
-        bool found = false;
-        for (int i = 0; i < loadedFile.Length; i++)
-            // This has to be made culture-invariant, or, in some regions this could result in unexpected behaviour
-            // Consider also using .Contains here - is there a reason we make use of IndexOf?
-            if (loadedFile[i].IndexOf(lineContains, StringComparison.Ordinal) != -1)
-            {
-                //Replace the line
-                loadedFile[i] = replaceWith;
-                found = true;
-                break;
-            }
-
-        if (found)
-        {
-            //If it is found, write the file.
-            Log("Successfully applied patch...");
-            File.WriteAllLines("Balatro\\" + file, loadedFile);
-        }
-        else
-            Log("Unable to find patch location...");
-
-        return found;
-    }
-
-    /// <summary>
-    /// Prompts the user to select which patches they want, then applies them.
-    /// </summary>
-    // This is hideous, but it works.
-    void ApplyPatches()
-    {
-        Log("Applying mobile compatibilty patch...");
-        //Android platform support
-        ApplyPatch("globals.lua", "loadstring", @"    -- Removed 'loadstring' line which generated lua code that exited upon starting on mobile
-    if love.system.getOS() == 'Android' or love.system.getOS() == 'iOS' then
-        self.F_DISCORD = true
-        self.F_NO_ACHIEVEMENTS = true
-        self.F_SOUND_THREAD = true
-        self.F_VIDEO_SETTINGS = false
-        self.F_ENGLISH_ONLY = false
-        self.F_QUIT_BUTTON = false
-    end");
-        //On-screen keyboard
-        ApplyPatch("functions/button_callbacks.lua", "G.CONTROLLER.text_input_hook == e and G.CONTROLLER.HID.controller", "  if G.CONTROLLER.text_input_hook == e and (G.CONTROLLER.HID.controller or G.CONTROLLER.HID.touch) then");
-
-        // Flame fix patch
-        ApplyPatch("resources/shaders/flame.fs", "#define MY_HIGHP_OR_MEDIUMP highp", "\t#define MY_HIGHP_OR_MEDIUMP highp\n\tprecision highp float;");
-        ApplyPatch("resources/shaders/flame.fs", "#define MY_HIGHP_OR_MEDIUMP mediump", "\t#define MY_HIGHP_OR_MEDIUMP mediump\n\tprecision mediump float;");
-        ApplyPatch("resources/shaders/flame.fs", "vec4 effect( vec4 colour, Image texture, vec2 texture_coords, vec2 screen_coords )", "mediump vec4 effect( mediump vec4 colour, Image texture, mediump vec2 texture_coords, mediump vec2 screen_coords )");
-
-        //Ask whether they want the FPS cap patch
-        if (AskQuestion("Would you like to apply the FPS cap patch?"))
-        {
-            int fps = -1;
-            do
-            {
-                Log("Please enter your desired FPS cap (or leave blank to set to device refresh rate):");
-                // Conditional access as ReadLine is nullable
-                string input = Console.ReadLine()?.ToLower();
-
-                if (String.IsNullOrWhiteSpace(input))
-                {
-                    //Set to refresh rate if blank
-                    fps = -2;
-                    break;
-                }
-
-                try
-                {
-                    //Set to specific value
-                    fps = Convert.ToInt32(input);
-                }
-                catch
-                {
-                    // ignored
-                }
-            } while (fps <= 0 || fps > 999);
-
-            if (fps > 0)
-            {
-                //Apply the patch using the given FPS
-                ApplyPatch("main.lua", "G.FPS_CAP = G.FPS_CAP or", "        G.FPS_CAP = " + fps.ToString());
-            }
-            else
-            {
-                //Apply the patch using the display refresh rate
-                ApplyPatch("main.lua", "G.FPS_CAP = G.FPS_CAP or", @"        p_ww, p_hh, p_wflags = love.window.getMode()
-        G.FPS_CAP = p_wflags['refreshrate']");
-            }
-        }
-
-        //Extra patches
-
-        if (AskQuestion("Would you like to apply the landscape orientation patch (required for high DPI)?"))
-        {
-            // Asking ReSharper to disable naming here, as, DPI (all-caps) is correct, not Dpi
-            // ReSharper disable once InconsistentNaming
-            var highDPI = AskQuestion("Would you like to apply the high DPI patch (recommended for devices with high resolution)?");
-            ApplyPatch("main.lua", "local os = love.system.getOS()", "    local os = love.system.getOS()\n    love.window.setMode(2, 1" + (highDPI ? ", {highdpi = true}" : "") + ")");
-        }
-
-        if (AskQuestion("Would you like to apply the CRT shader disable patch? (Required for Pixel and some other devices!)"))
-        {
-            ApplyPatch("globals.lua", "crt = ", "            crt = 0,");
-            ApplyPatch("game.lua", "G.SHADERS['CRT'])", "");
-        }
-
-        //Disabled, since this seems to actually be the HARDER way of doing this
-        //I'll leave it in the code base for now though...
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-#pragma warning disable CS0162 // Unreachable code detected
-        if (false && AskQuestion("Would you like to apply the accessible saves patch?"))
-            // ReSharper disable once HeuristicUnreachableCode
-            ApplyPatch("conf.lua", "t.window.width = 0", "    t.window.width = 0\n    t.externalstorage = true");
-#pragma warning restore CS0162 // Unreachable code detected
-    }
-
-    /// <summary>
     /// Attempts to download a file if it does not exist
     /// </summary>
     /// <param name="name">Friendly name for file (for logging)</param>
@@ -598,7 +466,7 @@ existing_zip.close()");
     // This saves me from writing Console.WriteLine a million times
     // ReSharper disable once GrammarMistakeInComment
     // There's probably a better way to make an alias in C#. Oh well
-    void Log(string text)
+    public static void Log(string text)
     {
         Console.WriteLine(text);
     }
@@ -618,7 +486,7 @@ existing_zip.close()");
     /// </summary>
     /// <param name="question">Prompt for the user</param>
     /// <returns>Status of prompt - true for 'Y', false for 'N'</returns>
-    bool AskQuestion(string question)
+    public static bool AskQuestion(string question)
     {
         string input = null;
         do
