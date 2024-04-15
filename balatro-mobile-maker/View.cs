@@ -102,48 +102,12 @@ internal class View
 
             if (_iosBuild)
             {
-                #region Python
-                //Check for Python
-                Log("Checking for Python...");
-                if (CommandLine(PythonCommand).ExitCode == 0)
-                    Log("Python found.");
-                else
-                {
-                    Log("Python not found, please install Python!");
-
-                    //Prompt user to automatically download install Python
-                    if (AskQuestion("Would you like to automatically download and install Python?"))
-                    {
-                        //Download
-                        TryDownloadFile("Python", PythonWinX64Link, "python-installer.exe");
-                        //Install
-                        Log("Installing Python...");
-                        CommandLine("python-installer.exe /quiet");
-
-                        //Check again for Python
-                        if (CommandLine(PythonCommand).ExitCode != 0)
-                        {
-                            //Critical error
-                            Log("Python still not detected! Try to re-launch, or install Python manually from the Microsoft Store.");
-                            CommandLine("python");
-                            Exit();
-                        }
-                    }
-                    else
-                    {
-                        //User does not wish to automatically download and install Python
-                        //Take them to the download link instead. Halt program
-                        CommandLine("python");
-                        Exit();
-                    }
-                }
-                #endregion
-
                 #region iOS Tools
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
                     new Thread(() => { TryDownloadFile("7-Zip", SevenzipLink, "7za.exe"); }),
+                    new Thread(() => { TryDownloadFile("Python", PythonWinX64Link, "python.zip"); }),
                     new Thread(() => { TryDownloadFile("iOS Base", IosBaseLink, "balatro-base.ipa"); })
                 ];
 
@@ -311,9 +275,12 @@ internal class View
             if (_iosBuild)
             {
                 #region Packing IPA
+                Log("Extracting Python");
+                CommandLine("7za x python.zip -opython");
+
                 Log("Repacking iOS app...");
                 File.WriteAllText("ios.py", Constants.PythonScript);
-                CommandLine("python ios.py");
+                CommandLine("python\\python ios.py");
                 CommandLine("move balatro-base.zip balatro.ipa");
                 #endregion
             }
@@ -355,7 +322,7 @@ internal class View
         }
         else
         {
-            if (AskQuestion("Would you like to pull saves from your Android device?"))
+            if (!_iosBuild && AskQuestion("Would you like to pull saves from your Android device?"))
             {
                 Log("Warning! If Steam Cloud is enabled, it will overwrite the save you transfer!");
                 while (!AskQuestion("Have you backed up your saves?"))
@@ -426,10 +393,11 @@ internal class View
             CommandLine("del balatro-aligned-debugSigned.apk.idsig");
             CommandLine("del balatro-unsigned.apk");
             CommandLine("del platform-tools.zip");
-            CommandLine("del python-installer.exe");
+            CommandLine("del python.zip");
             CommandLine("del ios.py");
             CommandLine("del game.love");
             CommandLine("rmdir platform-tools\\ /S /Q");
+            CommandLine("rmdir python\\ /S /Q");
             CommandLine("rmdir Balatro-APK-Patch\\ /S /Q");
             CommandLine("rmdir Balatro\\ /S /Q");
             CommandLine("rmdir balatro-apk\\ /S /Q");

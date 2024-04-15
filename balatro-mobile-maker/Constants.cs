@@ -17,9 +17,9 @@ internal static class Constants
     public const string Love2dApkLink = "https://github.com/love2d/love-android/releases/download/11.5a/love-11.5-android-embed.apk";
     public const string PlatformToolsLink = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
     public const string IosBaseLink = "https://github.com/blake502/balatro-apk-maker/releases/download/Additional-Tools-1.0/balatro-base.ipa";
-    public const string PythonWinX64Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe";
-    public const string PythonWinArm64Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-arm64.exe";
-    public const string PythonWinX86Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3.exe";
+    public const string PythonWinX64Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-embed-amd64.zip";
+    public const string PythonWinX86Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-embed-win32.zip";
+    public const string PythonWinArm64Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-embed-arm64.zip";
 
 
     public const string PythonScript = 
