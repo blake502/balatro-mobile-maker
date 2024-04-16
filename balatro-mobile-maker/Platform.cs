@@ -22,7 +22,6 @@ internal class Platform
     private static bool isArm64 = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == Architecture.Arm64;
     private static bool isArm = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == Architecture.Arm;
 
-    private static OSPlatform platform;
     private static Architecture architecture = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
 
     //Uses ADB with args
