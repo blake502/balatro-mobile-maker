@@ -27,7 +27,7 @@ Please review the **Notes** section before you begin.
  - This script assumes that **Balatro.exe** is located in the default *Steam* directory (`C:\Program Files (x86)\Steam\steamapps\common\Balatro\Balatro.exe`). If it is not, simply copy your **Balatro.exe** to the same folder as **balatro-mobile-maker.exe**
  - This script will automatically download [7-Zip](https://www.7-zip.org/)
  ### For Android:
- - This script can automatically download and install [Java](https://www.java.com/en/download/)
+ - This script will automatically download [OpenJDK](https://www.microsoft.com/openjdk)
  - This script will automatically download [APK Tool](https://apktool.org/)
  - This script will automatically download [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer/)
  - This script will automatically download [love-11.5-android-embed.apk](https://github.com/love2d/love-android/)
@@ -53,5 +53,5 @@ Please review the **Notes** section before you begin.
  - This project uses [APKTool](https://github.com/iBotPeaches/Apktool/blob/master/LICENSE.md)
  - This project uses [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer/blob/main/LICENSE)
  - This project uses [LÖVE](https://github.com/love2d/love/blob/main/license.txt)
- - This project uses [Java](https://www.oracle.com/downloads/licenses/javase-license1.html)
+ - This project uses [OpenJDK](https://www.microsoft.com/openjdk)
  - This project uses [Python](https://opensource.org/license/python-2-0)

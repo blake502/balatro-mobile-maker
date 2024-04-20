@@ -12,8 +12,7 @@ internal class Tools
         SevenZip,
         ADB,
         Java,
-        Python,
-        UberApkSigner
+        Python
     }
 
     public static void useTool(ProcessTools tool, string args)
@@ -25,6 +24,9 @@ internal class Tools
                 break;
             case ProcessTools.Python:
                 Platform.usePython(args);
+                break;
+            case ProcessTools.Java:
+                Platform.useJava(args);
                 break;
         }
     }

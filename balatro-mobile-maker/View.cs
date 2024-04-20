@@ -44,47 +44,13 @@ internal class View
             #region Download tools
             if (_androidBuild)
             {
-                #region Java
-                //Check for Java
-                Log("Checking for Java...");
-                if (CommandLine(JavaCommand).ExitCode == 0)
-                    Log("Java found.");
-                else
-                {
-                    Log("Java not found, please install Java!");
-
-                    //Prompt user to automatically download install Java
-                    if (AskQuestion("Would you like to automatically download and install Java?"))
-                    {
-                        //Download
-                        TryDownloadFile("Java", Jre8InstallerLink, "java-installer.exe");
-                        //Install
-                        Log("Installing Java...");
-                        CommandLine("java-installer.exe /s");
-
-                        //Check again for Java
-                        if (CommandLine(JavaCommand).ExitCode != 0)
-                        {
-                            //Critical error
-                            Log("Java still not detected! Try to re-launch.");
-                            Exit();
-                        }
-                    }
-                    else
-                    {
-                        //User does not wish to automatically download and install Java
-                        //Take them to the download link instead. Halt program
-                        CommandLine(JavaDownloadCommand);
-                        Exit();
-                    }
-                }
-                #endregion
-
                 #region Android tools
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
-                    new Thread(() => { TryDownloadFile("7-Zip", SevenzipLink, "7za.exe"); }),
+                    //TODO: Multiplatform OpenJDK
+                    new Thread(() => { TryDownloadFile("OpenJDK", OpenJDKWinX64Link, "openjdk.zip"); }),
+                    new Thread(() => { TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe"); }),
                     new Thread(() => { TryDownloadFile("APKTool", ApktoolLink, "apktool.jar"); }),
                     new Thread(() => { TryDownloadFile("uber-apk-signer", UberapktoolLink, "uber-apk-signer.jar"); }),
                     new Thread(() => { TryDownloadFile("Balatro-APK-Patch", BalatroApkPatchLink, "Balatro-APK-Patch.zip"); }),
@@ -106,7 +72,7 @@ internal class View
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
-                    new Thread(() => { TryDownloadFile("7-Zip", SevenzipLink, "7za.exe"); }),
+                    new Thread(() => { TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe"); }),
                     new Thread(() => { TryDownloadFile("Python", PythonWinX64Link, "python.zip"); }),
                     new Thread(() => { TryDownloadFile("iOS Base", IosBaseLink, "balatro-base.ipa"); })
                 ];
@@ -173,7 +139,8 @@ internal class View
                 }
 
                 //Unpack Love2D APK
-                CommandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
+                CommandLine("7za x openjdk.zip");
+                useTool(ProcessTools.Java, "-jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
 
                 //Check for failure
                 if (!Directory.Exists("balatro-apk"))
@@ -245,7 +212,7 @@ internal class View
             {
                 #region Packing APK
                 Log("Repacking APK...");
-                CommandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" b -o balatro.apk balatro-apk");
+                useTool(ProcessTools.Java, "-jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" b -o balatro.apk balatro-apk");
 
                 if (!File.Exists("balatro.apk"))
                 {
@@ -256,7 +223,7 @@ internal class View
 
                 #region Signing APK
                 Log("Signing APK...");
-                CommandLine("java -jar uber-apk-signer.jar -a balatro.apk");
+                useTool(ProcessTools.Java, "-jar uber-apk-signer.jar -a balatro.apk");
 
                 if (!File.Exists("balatro-aligned-debugSigned.apk"))
                 {
@@ -385,7 +352,6 @@ internal class View
         {
             Log("Deleting temporary files...");
 
-            CommandLine("del java-installer.exe");
             CommandLine("del love-11.5-android-embed.apk");
             CommandLine("del Balatro-APK-Patch.zip");
             CommandLine("del apktool.jar");
@@ -498,7 +464,7 @@ internal class View
                 TryDownloadFile("platform-tools", PlatformToolsLink, "platform-tools.zip");
 
             if (!File.Exists("7za.exe"))
-                TryDownloadFile("7-Zip", SevenzipLink, "7za.exe");
+                TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe");
 
             Log("Extracting platform-tools...");
             CommandLine("7za x platform-tools.zip -oplatform-tools");

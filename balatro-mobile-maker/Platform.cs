@@ -27,7 +27,7 @@ internal class Platform
     //Uses ADB with args
     public static void useADB(string args)
     {
-        if(isWindows)
+        if (isWindows)
             CommandLine("platform-tools\\platform-tools\\adb.exe " + args);
 
         if (isOSX) { /*...*/ }
@@ -35,6 +35,18 @@ internal class Platform
         if (isLinux) { /*...*/ }
     }
 
+    //Uses Java with args
+    public static void useJava(string args)
+    {
+        if (isWindows)
+            CommandLine("jdk-21.0.3+9\\bin\\java.exe " + args);
+
+        if (isOSX) { /*...*/ }
+
+        if (isLinux) { /*...*/ }
+    }
+
+    //Uses Python with args
     public static void usePython(string args)
     {
         if (isWindows)
@@ -43,6 +55,37 @@ internal class Platform
         if (isOSX) { /*...*/ }
 
         if (isLinux) { /*...*/ }
+    }
+
+    public static string get7ZipDownloadLink()
+    {
+        if (isWindows)
+        {
+            if (isX64)
+                return Constants.SevenzipWinX64Link;
+            if (isX86)
+                return Constants.SevenzipWinX86Link;
+            if (isArm64)
+                return Constants.SevenzipWinArm64Link;
+        }
+
+        if (isOSX)
+            return Constants.SevenzipOSXLink;
+
+        if (isLinux)
+        {
+            if (isX64)
+                return Constants.SevenzipLinuxX64Link;
+            if (isX86)
+                return Constants.SevenzipLinuxX86Link;
+            if (isArm64)
+                return Constants.SevenzipLinuxArm64Link;
+            if (isArm)
+                return Constants.SevenzipLinuxArmLink;
+        }
+
+
+        return "";
     }
 
     public static string getGameSaveLocation()
