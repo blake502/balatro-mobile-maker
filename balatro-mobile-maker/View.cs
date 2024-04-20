@@ -3,8 +3,9 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.IO;
+using System.Runtime.InteropServices;
 using static balatro_mobile_maker.Constants;
-
+using static balatro_mobile_maker.Tools;
 
 namespace balatro_mobile_maker;
 
@@ -14,26 +15,28 @@ namespace balatro_mobile_maker;
 // NOTE: Much should be refactored out of UI logic land, and, into a Controller which we can query state from.
 internal class View
 {
-    private bool _verboseMode;
+    private static bool _verboseMode;
 
     private bool _androidBuild;
     private bool _iosBuild;
+
+    private static bool _cleaup;
+
+    static bool gameProvided;
 
     /// <summary>
     /// Start CLI operation.
     /// </summary>
     public void Begin()
     {
-        bool exeProvided = File.Exists("Balatro.exe");
-
         Log("====Balatro APK Maker====\n7-Zip is licensed under the GNU LGPL license. Please visit: www.7-zip.org\n\n");
 
         //Initial prompts
-        bool cleanup = AskQuestion("Would you like to automatically clean up once complete?");
+        _cleaup = AskQuestion("Would you like to automatically clean up once complete?");
         _verboseMode = AskQuestion("Would you like to enable extra logging information?");
 
-        //If balatro.apk already exists, ask before beginning build process again
-        if ((!File.Exists("balatro.apk") && !File.Exists("balatro.ipa")) || AskQuestion("A previous build was found... Would you like to build again?"))
+        //If balatro.apk or balatro.ipa already exists, ask before beginning build process again
+        if (!(File.Exists("balatro.apk") || File.Exists("balatro.ipa")) || AskQuestion("A previous build was found... Would you like to build again?"))
         {
             _androidBuild = AskQuestion("Would you like to build for Android?");
             _iosBuild = !_androidBuild && AskQuestion("Would you like to build for iOS (experimental)?");
@@ -41,47 +44,15 @@ internal class View
             #region Download tools
             if (_androidBuild)
             {
-                #region Java
-                //Check for Java
-                Log("Checking for Java...");
-                if (CommandLine(JavaCommand).ExitCode == 0)
-                    Log("Java found.");
-                else
-                {
-                    Log("Java not found, please install Java!");
-
-                    //Prompt user to automatically download install Java
-                    if (AskQuestion("Would you like to automatically download and install Java?"))
-                    {
-                        //Download
-                        TryDownloadFile("Java", Jre8InstallerLink, "java-installer.exe");
-                        //Install
-                        Log("Installing Java...");
-                        CommandLine("java-installer.exe /s");
-
-                        //Check again for Java
-                        if (CommandLine(JavaCommand).ExitCode != 0)
-                        {
-                            //Critical error
-                            Log("Java still not detected! Try to re-launch.");
-                            Exit();
-                        }
-                    }
-                    else
-                    {
-                        //User does not wish to automatically download and install Java
-                        //Take them to the download link instead. Halt program
-                        CommandLine(JavaDownloadCommand);
-                        Exit();
-                    }
-                }
-                #endregion
-
                 #region Android tools
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
-                    new Thread(() => { TryDownloadFile("7-Zip", SevenzipLink, "7za.exe"); }),
+                    //TODO: Platform specific file downloads for OpenJDK and 7-Zip
+                    new Thread(() => { TryDownloadFile("OpenJDK", Platform.getOpenJDKDownloadLink(), "openjdk.zip"); }),
+                    new Thread(() => { TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe"); }),
+
+
                     new Thread(() => { TryDownloadFile("APKTool", ApktoolLink, "apktool.jar"); }),
                     new Thread(() => { TryDownloadFile("uber-apk-signer", UberapktoolLink, "uber-apk-signer.jar"); }),
                     new Thread(() => { TryDownloadFile("Balatro-APK-Patch", BalatroApkPatchLink, "Balatro-APK-Patch.zip"); }),
@@ -99,48 +70,14 @@ internal class View
 
             if (_iosBuild)
             {
-                #region Python
-                //Check for Python
-                Log("Checking for Python...");
-                if (CommandLine(PythonCommand).ExitCode == 0)
-                    Log("Python found.");
-                else
-                {
-                    Log("Python not found, please install Python!");
-
-                    //Prompt user to automatically download install Python
-                    if (AskQuestion("Would you like to automatically download and install Python?"))
-                    {
-                        //Download
-                        TryDownloadFile("Python", PythonLink, "python-installer.exe");
-                        //Install
-                        Log("Installing Python...");
-                        CommandLine("python-installer.exe /quiet");
-
-                        //Check again for Python
-                        if (CommandLine(PythonCommand).ExitCode != 0)
-                        {
-                            //Critical error
-                            Log("Python still not detected! Try to re-launch, or install Python manually from the Microsoft Store.");
-                            CommandLine("python");
-                            Exit();
-                        }
-                    }
-                    else
-                    {
-                        //User does not wish to automatically download and install Python
-                        //Take them to the download link instead. Halt program
-                        CommandLine("python");
-                        Exit();
-                    }
-                }
-                #endregion
-
                 #region iOS Tools
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
-                    new Thread(() => { TryDownloadFile("7-Zip", SevenzipLink, "7za.exe"); }),
+                    //TODO: Platform specific file downloads for Python and 7-Zip
+                    new Thread(() => { TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe"); }),
+                    new Thread(() => { TryDownloadFile("Python", PythonWinX64Link, "python.zip"); }),
+
                     new Thread(() => { TryDownloadFile("iOS Base", IosBaseLink, "balatro-base.ipa"); })
                 ];
 
@@ -155,21 +92,25 @@ internal class View
 
             #region Prepare workspace
             #region Find and extract Balatro.exe
-            if (!exeProvided)
-            {
-                //Attempt to copy Balatro.exe from Steam directory
-                Log("Copying Balatro.exe from Steam directory...");
-                CommandLine("xcopy \"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Balatro\\Balatro.exe\" \"Balatro.exe\" /E /H /Y /V /-I");
 
-                if (!File.Exists("Balatro.exe"))
+            gameProvided = Platform.gameExists();
+
+            if (gameProvided)
+                Log("Game found!");
+            else
+            {
+                //Game not provided
+
+                //Try to locate automatically
+                if (Platform.tryLocateGame())
+                    Log("Game copied!");
+                else
                 {
-                    //Balatro.exe still not found. Critical error.
+                    //Game not provided, and could not be located
                     Log("Could not find Balatro.exe! Please place it in this folder, then try again!");
                     Exit();
                 }
             }
-            else
-                Log("Balatro.exe already exists.");
 
             Log("Extracting Balatro.exe...");
             if (Directory.Exists("Balatro"))
@@ -180,7 +121,7 @@ internal class View
             }
 
             //Extract Balatro.exe with 7-Zip
-            CommandLine("7za x Balatro.exe -oBalatro");
+            useTool(ProcessTools.SevenZip, "x Balatro.exe -oBalatro");
 
             //Check for failure
             if (!Directory.Exists("Balatro"))
@@ -202,7 +143,9 @@ internal class View
                 }
 
                 //Unpack Love2D APK
-                CommandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
+
+                useTool(ProcessTools.SevenZip, "x openjdk.zip");
+                useTool(ProcessTools.Java, "-jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
 
                 //Check for failure
                 if (!Directory.Exists("balatro-apk"))
@@ -221,7 +164,7 @@ internal class View
                 }
 
                 //Extract Balatro-APK-Patch
-                CommandLine("7za.exe  x Balatro-APK-Patch.zip -oBalatro-APK-Patch");
+                useTool(ProcessTools.SevenZip, "x Balatro-APK-Patch.zip -oBalatro-APK-Patch");
 
                 if (!Directory.Exists("Balatro-APK-Patch"))
                 {
@@ -254,6 +197,9 @@ internal class View
 
             #region Balatro.exe -> game.love
             Log("Packing Balatro folder...");
+            //TODO: Figure out how to NOT do this
+            //I struggled to pack something other than the working directory
+            //I'm probably dumb for this
             CommandLine("\"cd Balatro && ..\\7za.exe a balatro.zip && cd ..\"");
 
             if (!File.Exists("Balatro\\balatro.zip"))
@@ -274,7 +220,7 @@ internal class View
             {
                 #region Packing APK
                 Log("Repacking APK...");
-                CommandLine("java.exe -jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" b -o balatro.apk balatro-apk");
+                useTool(ProcessTools.Java, "-jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" b -o balatro.apk balatro-apk");
 
                 if (!File.Exists("balatro.apk"))
                 {
@@ -285,7 +231,7 @@ internal class View
 
                 #region Signing APK
                 Log("Signing APK...");
-                CommandLine("java -jar uber-apk-signer.jar -a balatro.apk");
+                useTool(ProcessTools.Java, "-jar uber-apk-signer.jar -a balatro.apk");
 
                 if (!File.Exists("balatro-aligned-debugSigned.apk"))
                 {
@@ -304,13 +250,13 @@ internal class View
             if (_iosBuild)
             {
                 #region Packing IPA
+                Log("Extracting Python");
+                useTool(ProcessTools.SevenZip, "x python.zip -opython");
+
                 Log("Repacking iOS app...");
-                File.WriteAllText("ios.py", @"import zipfile
-existing_zip = zipfile.ZipFile('balatro-base.zip', 'a')
-new_file_path = 'game.love'
-existing_zip.write(new_file_path, arcname='Payload/Balatro.app/game.love')
-existing_zip.close()");
-                CommandLine("python ios.py");
+                File.WriteAllText("ios.py", Constants.PythonScript);
+                useTool(ProcessTools.Python, "ios.py");
+
                 CommandLine("move balatro-base.zip balatro.ipa");
                 #endregion
             }
@@ -325,7 +271,9 @@ existing_zip.close()");
             PrepareAndroidPlatformTools();
 
             Log("Attempting to install. If prompted, please allow the USB Debugging connection on your Android device.");
-            CommandLine("cd platform-tools && cd platform-tools && adb install ..\\..\\balatro.apk && adb kill-server");
+            
+            useTool(ProcessTools.ADB, "install balatro.apk");
+            useTool(ProcessTools.ADB, "kill-server");
         }
         #endregion
 
@@ -337,16 +285,20 @@ existing_zip.close()");
             PrepareAndroidPlatformTools();
 
             Log("Attempting to transfer saves. If prompted, please allow the USB Debugging connection on your Android device.");
-            CommandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro");
-            CommandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files");
-            CommandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files/save");
-            CommandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files/save/game");
-            CommandLine("cd platform-tools && cd platform-tools && adb push \"%AppData%/Balatro/.\" /data/local/tmp/balatro/files/save/game && adb shell am force-stop com.unofficial.balatro && adb shell run-as com.unofficial.balatro cp -r /data/local/tmp/balatro/files . && adb shell rm -r /data/local/tmp/balatro && adb kill-server");
 
+            useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro");
+            useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/files");
+            useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/files/save");
+            useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/balatro/files/save/game");
+            useTool(ProcessTools.ADB, "push \"" + Platform.getGameSaveLocation() + ".\" /data/local/tmp/balatro/files/save/game");
+            useTool(ProcessTools.ADB, "shell am force-stop com.unofficial.balatro");
+            useTool(ProcessTools.ADB, "shell run-as com.unofficial.balatro cp -r /data/local/tmp/balatro/files .");
+            useTool(ProcessTools.ADB, "shell rm -r /data/local/tmp/balatro");
+            useTool(ProcessTools.ADB, "kill-server");
         }
         else
         {
-            if (AskQuestion("Would you like to pull saves from your Android device?"))
+            if (!_iosBuild && AskQuestion("Would you like to pull saves from your Android device?"))
             {
                 Log("Warning! If Steam Cloud is enabled, it will overwrite the save you transfer!");
                 while (!AskQuestion("Have you backed up your saves?"))
@@ -354,74 +306,83 @@ existing_zip.close()");
 
                 PrepareAndroidPlatformTools();
 
+                //TODO: Platform
                 Log("Backing up your files...");
                 CommandLine("xcopy \"%appdata%\\Balatro\\\" \"%appdata%\\BalatroBACKUP\\\" /E /H /Y /V");
                 CommandLine("rmdir \"%appdata%\\Balatro\\\" /S /Q");
                 CommandLine("mkdir \"%appdata%\\Balatro\\\"");
 
-                //This sure isn't pretty, but it should work!
-                CommandLine("cd platform-tools && cd platform-tools && adb shell rm -r /data/local/tmp/balatro");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files/");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files/1/");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files/2/");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell mkdir /data/local/tmp/balatro/files/3/");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell touch /data/local/tmp/balatro/files/settings.jkr");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell \"run-as com.unofficial.balatro cat files/save/game/settings.jkr > /data/local/tmp/balatro/files/settings.jkr\"");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell touch /data/local/tmp/balatro/files/1/profile.jkr");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell \"run-as com.unofficial.balatro cat files/save/game/1/profile.jkr > /data/local/tmp/balatro/files/1/profile.jkr\"");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell touch /data/local/tmp/balatro/files/1/meta.jkr");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell \"run-as com.unofficial.balatro cat files/save/game/1/meta.jkr > /data/local/tmp/balatro/files/1/meta.jkr\"");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell touch /data/local/tmp/balatro/files/1/save.jkr");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell \"run-as com.unofficial.balatro cat files/save/game/1/save.jkr > /data/local/tmp/balatro/files/1/save.jkr\"");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell touch /data/local/tmp/balatro/files/2/profile.jkr");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell \"run-as com.unofficial.balatro cat files/save/game/2/profile.jkr > /data/local/tmp/balatro/files/2/profile.jkr\"");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell touch /data/local/tmp/balatro/files/2/meta.jkr");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell \"run-as com.unofficial.balatro cat files/save/game/2/meta.jkr > /data/local/tmp/balatro/files/2/meta.jkr\"");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell touch /data/local/tmp/balatro/files/2/save.jkr");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell \"run-as com.unofficial.balatro cat files/save/game/2/save.jkr > /data/local/tmp/balatro/files/2/save.jkr\"");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell touch /data/local/tmp/balatro/files/3/profile.jkr");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell \"run-as com.unofficial.balatro cat files/save/game/3/profile.jkr > /data/local/tmp/balatro/files/3/profile.jkr\"");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell touch /data/local/tmp/balatro/files/3/meta.jkr");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell \"run-as com.unofficial.balatro cat files/save/game/3/meta.jkr > /data/local/tmp/balatro/files/3/meta.jkr\"");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell touch /data/local/tmp/balatro/files/3/save.jkr");
-                CommandLine("cd platform-tools && cd platform-tools && adb shell \"run-as com.unofficial.balatro cat files/save/game/3/save.jkr > /data/local/tmp/balatro/files/3/save.jkr\"");
-                CommandLine("cd platform-tools && cd platform-tools && adb pull /data/local/tmp/balatro/files/. %AppData%/Balatro/");
-
                 Log("Attempting to pull save files from Android device.");
+
+                //This sure isn't pretty, but it should work!
+                useTool(ProcessTools.ADB, "shell rm -r /data/local/tmp/balatro");
+                useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/");
+                useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/files/");
+                useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/files/1/");
+                useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/files/2/");
+                useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/files/3/");
+                useTool(ProcessTools.ADB, "shell touch /data/local/tmp/balatro/files/settings.jkr");
+                useTool(ProcessTools.ADB, "shell \"run-as com.unofficial.balatro cat files/save/game/settings.jkr > /data/local/tmp/balatro/files/settings.jkr\"");
+                useTool(ProcessTools.ADB, "shell touch /data/local/tmp/balatro/files/1/profile.jkr");
+                useTool(ProcessTools.ADB, "shell \"run-as com.unofficial.balatro cat files/save/game/1/profile.jkr > /data/local/tmp/balatro/files/1/profile.jkr\"");
+                useTool(ProcessTools.ADB, "shell touch /data/local/tmp/balatro/files/1/meta.jkr");
+                useTool(ProcessTools.ADB, "shell \"run-as com.unofficial.balatro cat files/save/game/1/meta.jkr > /data/local/tmp/balatro/files/1/meta.jkr\"");
+                useTool(ProcessTools.ADB, "shell touch /data/local/tmp/balatro/files/1/save.jkr");
+                useTool(ProcessTools.ADB, "shell \"run-as com.unofficial.balatro cat files/save/game/1/save.jkr > /data/local/tmp/balatro/files/1/save.jkr\"");
+                useTool(ProcessTools.ADB, "shell touch /data/local/tmp/balatro/files/2/profile.jkr");
+                useTool(ProcessTools.ADB, "shell \"run-as com.unofficial.balatro cat files/save/game/2/profile.jkr > /data/local/tmp/balatro/files/2/profile.jkr\"");
+                useTool(ProcessTools.ADB, "shell touch /data/local/tmp/balatro/files/2/meta.jkr");
+                useTool(ProcessTools.ADB, "shell \"run-as com.unofficial.balatro cat files/save/game/2/meta.jkr > /data/local/tmp/balatro/files/2/meta.jkr\"");
+                useTool(ProcessTools.ADB, "shell touch /data/local/tmp/balatro/files/2/save.jkr");
+                useTool(ProcessTools.ADB, "shell \"run-as com.unofficial.balatro cat files/save/game/2/save.jkr > /data/local/tmp/balatro/files/2/save.jkr\"");
+                useTool(ProcessTools.ADB, "shell touch /data/local/tmp/balatro/files/3/profile.jkr");
+                useTool(ProcessTools.ADB, "shell \"run-as com.unofficial.balatro cat files/save/game/3/profile.jkr > /data/local/tmp/balatro/files/3/profile.jkr\"");
+                useTool(ProcessTools.ADB, "shell touch /data/local/tmp/balatro/files/3/meta.jkr");
+                useTool(ProcessTools.ADB, "shell \"run-as com.unofficial.balatro cat files/save/game/3/meta.jkr > /data/local/tmp/balatro/files/3/meta.jkr\"");
+                useTool(ProcessTools.ADB, "shell touch /data/local/tmp/balatro/files/3/save.jkr");
+                useTool(ProcessTools.ADB, "shell \"run-as com.unofficial.balatro cat files/save/game/3/save.jkr > /data/local/tmp/balatro/files/3/save.jkr\"");
+
+                useTool(ProcessTools.ADB, "pull /data/local/tmp/balatro/files/. \"" + Platform.getGameSaveLocation() + "\"");
+
+                useTool(ProcessTools.ADB, "kill-server");
             }
         }
         #endregion
         #endregion
 
-        #region Cleanup
-        if (cleanup)
+        Log("Finished!");
+        Exit();
+    }
+
+    private static void Cleanup()
+    {
+        if (_cleaup)
         {
             Log("Deleting temporary files...");
 
-            CommandLine("del java-installer.exe");
             CommandLine("del love-11.5-android-embed.apk");
-            CommandLine("del Balatro-APK-Patch.zip");
+            CommandLine("del Balatro-APK-Patch.zip");//TODO: remove when Android build changes
+            //CommandLine("del AndroidManifest.xml");//TODO: enable when Android build changes
             CommandLine("del apktool.jar");
             CommandLine("del uber-apk-signer.jar");
             CommandLine("del 7za.exe");
+            CommandLine("del openjdk.zip");
             CommandLine("del balatro-aligned-debugSigned.apk.idsig");
             CommandLine("del balatro-unsigned.apk");
             CommandLine("del platform-tools.zip");
-            CommandLine("del python-installer.exe");
+            CommandLine("del python.zip");
             CommandLine("del ios.py");
             CommandLine("del game.love");
+            //CommandLine("rmdir icons\\ /S /Q");//TODO: enable when Android build changes
             CommandLine("rmdir platform-tools\\ /S /Q");
-            CommandLine("rmdir Balatro-APK-Patch\\ /S /Q");
+            CommandLine("rmdir jdk-21.0.3+9\\ /S /Q");
+            CommandLine("rmdir python\\ /S /Q");
+            CommandLine("rmdir Balatro-APK-Patch\\ /S /Q");//TODO: remove when Android build changes
             CommandLine("rmdir Balatro\\ /S /Q");
             CommandLine("rmdir balatro-apk\\ /S /Q");
-            if (!exeProvided)
+            if (!gameProvided)
                 CommandLine("del Balatro.exe");
         }
-        #endregion
-
-        Log("Finished!");
-        Exit();
     }
 
     /// <summary>
@@ -474,8 +435,9 @@ existing_zip.close()");
     /// <summary>
     /// Exits the application after the user presses any key
     /// </summary>
-    void Exit()
+    public static void Exit()
     {
+        Cleanup();
         Log("Press any key to exit...");
         Console.ReadKey();
         Environment.Exit(1);
@@ -513,11 +475,11 @@ existing_zip.close()");
             if (!File.Exists("platform-tools.zip"))
                 TryDownloadFile("platform-tools", PlatformToolsLink, "platform-tools.zip");
 
-            if (!File.Exists("7za.exe"))
-                TryDownloadFile("7-Zip", SevenzipLink, "7za.exe");
+            //TODO: Platform-specific 
+            TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe");
 
             Log("Extracting platform-tools...");
-            CommandLine("7za x platform-tools.zip -oplatform-tools");
+            useTool(ProcessTools.SevenZip, "x platform-tools.zip -oplatform-tools");
         }
 
         //Prompt user
@@ -530,7 +492,7 @@ existing_zip.close()");
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void ProcessOutputHandler(object sender, DataReceivedEventArgs e)
+    private static void ProcessOutputHandler(object sender, DataReceivedEventArgs e)
     {
         if (_verboseMode && e.Data != null)
             Log("    " + e.Data);
@@ -543,7 +505,7 @@ existing_zip.close()");
     /// </summary>
     /// <param name="args">Command to pass to the shell</param>
     /// <returns>Process, post finishing.</returns>
-    Process CommandLine(string args)
+    public static Process CommandLine(string args)
     {
         //Create a new cmd process
         Process commandLineProcess = new Process();
