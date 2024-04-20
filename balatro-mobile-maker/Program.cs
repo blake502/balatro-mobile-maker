@@ -18,7 +18,7 @@ internal static class Program
     {
         //TODO: Better command line args handling 
         foreach (string s in args)
-            if(s == "--enable-accessible-patch")
+            if(s == "--enable-external-storage-patch")
                 ArgsEnableAccessibleSave = true;
 
         View mainView = new View();
