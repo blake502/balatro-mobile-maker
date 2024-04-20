@@ -35,8 +35,8 @@ internal class View
         _cleaup = AskQuestion("Would you like to automatically clean up once complete?");
         _verboseMode = AskQuestion("Would you like to enable extra logging information?");
 
-        //If balatro.apk already exists, ask before beginning build process again
-        if ((!File.Exists("balatro.apk") && !File.Exists("balatro.ipa")) || AskQuestion("A previous build was found... Would you like to build again?"))
+        //If balatro.apk or balatro.ipa already exists, ask before beginning build process again
+        if (!(File.Exists("balatro.apk") || File.Exists("balatro.ipa")) || AskQuestion("A previous build was found... Would you like to build again?"))
         {
             _androidBuild = AskQuestion("Would you like to build for Android?");
             _iosBuild = !_androidBuild && AskQuestion("Would you like to build for iOS (experimental)?");
@@ -48,9 +48,11 @@ internal class View
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
-                    //TODO: Multiplatform OpenJDK
-                    new Thread(() => { TryDownloadFile("OpenJDK", OpenJDKWinX64Link, "openjdk.zip"); }),
+                    //TODO: Platform specific file downloads for OpenJDK and 7-Zip
+                    new Thread(() => { TryDownloadFile("OpenJDK", Platform.getOpenJDKDownloadLink(), "openjdk.zip"); }),
                     new Thread(() => { TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe"); }),
+
+
                     new Thread(() => { TryDownloadFile("APKTool", ApktoolLink, "apktool.jar"); }),
                     new Thread(() => { TryDownloadFile("uber-apk-signer", UberapktoolLink, "uber-apk-signer.jar"); }),
                     new Thread(() => { TryDownloadFile("Balatro-APK-Patch", BalatroApkPatchLink, "Balatro-APK-Patch.zip"); }),
@@ -72,8 +74,10 @@ internal class View
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
+                    //TODO: Platform specific file downloads for Python and 7-Zip
                     new Thread(() => { TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe"); }),
                     new Thread(() => { TryDownloadFile("Python", PythonWinX64Link, "python.zip"); }),
+
                     new Thread(() => { TryDownloadFile("iOS Base", IosBaseLink, "balatro-base.ipa"); })
                 ];
 
@@ -117,7 +121,7 @@ internal class View
             }
 
             //Extract Balatro.exe with 7-Zip
-            CommandLine("7za x Balatro.exe -oBalatro");
+            useTool(ProcessTools.SevenZip, "x Balatro.exe -oBalatro");
 
             //Check for failure
             if (!Directory.Exists("Balatro"))
@@ -139,7 +143,8 @@ internal class View
                 }
 
                 //Unpack Love2D APK
-                CommandLine("7za x openjdk.zip");
+
+                useTool(ProcessTools.SevenZip, "x openjdk.zip");
                 useTool(ProcessTools.Java, "-jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
 
                 //Check for failure
@@ -159,7 +164,7 @@ internal class View
                 }
 
                 //Extract Balatro-APK-Patch
-                CommandLine("7za.exe  x Balatro-APK-Patch.zip -oBalatro-APK-Patch");
+                useTool(ProcessTools.SevenZip, "x Balatro-APK-Patch.zip -oBalatro-APK-Patch");
 
                 if (!Directory.Exists("Balatro-APK-Patch"))
                 {
@@ -192,6 +197,9 @@ internal class View
 
             #region Balatro.exe -> game.love
             Log("Packing Balatro folder...");
+            //TODO: Figure out how to NOT do this
+            //I struggled to pack something other than the working directory
+            //I'm probably dumb for this
             CommandLine("\"cd Balatro && ..\\7za.exe a balatro.zip && cd ..\"");
 
             if (!File.Exists("Balatro\\balatro.zip"))
@@ -243,7 +251,7 @@ internal class View
             {
                 #region Packing IPA
                 Log("Extracting Python");
-                CommandLine("7za x python.zip -opython");
+                useTool(ProcessTools.SevenZip, "x python.zip -opython");
 
                 Log("Repacking iOS app...");
                 File.WriteAllText("ios.py", Constants.PythonScript);
@@ -353,19 +361,23 @@ internal class View
             Log("Deleting temporary files...");
 
             CommandLine("del love-11.5-android-embed.apk");
-            CommandLine("del Balatro-APK-Patch.zip");
+            CommandLine("del Balatro-APK-Patch.zip");//TODO: remove when Android build changes
+            //CommandLine("del AndroidManifest.xml");//TODO: enable when Android build changes
             CommandLine("del apktool.jar");
             CommandLine("del uber-apk-signer.jar");
             CommandLine("del 7za.exe");
+            CommandLine("del openjdk.zip");
             CommandLine("del balatro-aligned-debugSigned.apk.idsig");
             CommandLine("del balatro-unsigned.apk");
             CommandLine("del platform-tools.zip");
             CommandLine("del python.zip");
             CommandLine("del ios.py");
             CommandLine("del game.love");
+            //CommandLine("rmdir icons\\ /S /Q");//TODO: enable when Android build changes
             CommandLine("rmdir platform-tools\\ /S /Q");
+            CommandLine("rmdir jdk-21.0.3+9\\ /S /Q");
             CommandLine("rmdir python\\ /S /Q");
-            CommandLine("rmdir Balatro-APK-Patch\\ /S /Q");
+            CommandLine("rmdir Balatro-APK-Patch\\ /S /Q");//TODO: remove when Android build changes
             CommandLine("rmdir Balatro\\ /S /Q");
             CommandLine("rmdir balatro-apk\\ /S /Q");
             if (!gameProvided)
@@ -463,11 +475,11 @@ internal class View
             if (!File.Exists("platform-tools.zip"))
                 TryDownloadFile("platform-tools", PlatformToolsLink, "platform-tools.zip");
 
-            if (!File.Exists("7za.exe"))
-                TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe");
+            //TODO: Platform-specific 
+            TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe");
 
             Log("Extracting platform-tools...");
-            CommandLine("7za x platform-tools.zip -oplatform-tools");
+            useTool(ProcessTools.SevenZip, "x platform-tools.zip -oplatform-tools");
         }
 
         //Prompt user

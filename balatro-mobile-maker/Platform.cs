@@ -35,6 +35,17 @@ internal class Platform
         if (isLinux) { /*...*/ }
     }
 
+    //Uses 7Zip with args
+    public static void useSevenZip(string args)
+    {
+        if (isWindows)
+            CommandLine("7za.exe " + args);
+
+        if (isOSX) { /*...*/ }
+
+        if (isLinux) { /*...*/ }
+    }
+
     //Uses Java with args
     public static void useJava(string args)
     {
@@ -56,6 +67,38 @@ internal class Platform
 
         if (isLinux) { /*...*/ }
     }
+    public static string getOpenJDKDownloadLink()
+    {
+        if (isWindows)
+        {
+            if (isX64)
+                return Constants.OpenJDKWinX64Link;
+            //TODO: uhh something maybe
+            //if (isX86)
+                //return Constants.OpenJDKWinX86Link; 
+            if (isArm64)
+                return Constants.OpenJDKWinArm64Link;
+        }
+
+        if (isOSX)
+        {
+            if (isX64)
+                return Constants.OpenJDKOSXX64Link;
+            if (isArm64)
+                return Constants.OpenJDKOSXArm64Link;
+        }
+
+        if (isLinux)
+        {
+            if (isX64)
+                return Constants.OpenJDKLinuxX64Link;
+            if (isArm64)
+                return Constants.OpenJDKLinuxArm64Link;
+        }
+
+
+        return "";
+    }
 
     public static string get7ZipDownloadLink()
     {
@@ -63,7 +106,7 @@ internal class Platform
         {
             if (isX64)
                 return Constants.SevenzipWinX64Link;
-            if (isX86)
+            if (isX86) //May not be supported, but included for now
                 return Constants.SevenzipWinX86Link;
             if (isArm64)
                 return Constants.SevenzipWinArm64Link;
@@ -76,14 +119,32 @@ internal class Platform
         {
             if (isX64)
                 return Constants.SevenzipLinuxX64Link;
-            if (isX86)
+            if (isX86) //May not be supported, but included for now
                 return Constants.SevenzipLinuxX86Link;
             if (isArm64)
                 return Constants.SevenzipLinuxArm64Link;
-            if (isArm)
+            if (isArm) //May not be supported, but included for now
                 return Constants.SevenzipLinuxArmLink;
         }
 
+
+        return "";
+    }
+    public static string getPythonDownloadLink()
+    {
+        if (isWindows)
+        {
+            if (isX64)
+                return Constants.PythonWinX64Link;
+            if (isX86) //May not be supported, but included for now
+                return Constants.PythonWinX86Link;
+            if (isArm64)
+                return Constants.PythonWinArm64Link;
+        }
+
+        if (isOSX) { /*...*/ }
+
+        if (isLinux) { /*...*/ }
 
         return "";
     }

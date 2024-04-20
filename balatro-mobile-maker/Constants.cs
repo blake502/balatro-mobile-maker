@@ -6,10 +6,6 @@
 /// </summary>
 internal static class Constants
 {
-    public const string JavaCommand = "java -version";
-    public const string PythonCommand = "python --version 3>NUL";
-    public const string JavaDownloadCommand = "explorer https://www.java.com/download/";
-
     //Extra tools download links
     public const string ApktoolLink = "https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.9.3.jar";
     public const string UberapktoolLink = "https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar";
@@ -21,6 +17,7 @@ internal static class Constants
     public const string PlatformToolsLink = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
 
     //OpenJDK Download Links
+    //TODO: Find JDK links for all platforms
     //Win
     public const string OpenJDKWinX64Link = "https://aka.ms/download-jdk/microsoft-jdk-21.0.3-windows-x64.zip";
     public const string OpenJDKWinX86Link = ""; //Uh oh: https://learn.microsoft.com/en-us/java/openjdk/download
@@ -47,10 +44,12 @@ internal static class Constants
     public const string SevenzipOSXLink = "https://www.7-zip.org/a/7z2403-mac.tar.xz";
 
 
-    //Python Embedded Links
+    //Python Links
+    //Win (Embedded)
     public const string PythonWinX64Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-embed-amd64.zip";
     public const string PythonWinX86Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-embed-win32.zip";
     public const string PythonWinArm64Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-embed-arm64.zip";
+    //TODO: Multiplatform Python
 
 
     public const string PythonScript = 

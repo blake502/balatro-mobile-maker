@@ -28,6 +28,9 @@ internal class Tools
             case ProcessTools.Java:
                 Platform.useJava(args);
                 break;
+            case ProcessTools.SevenZip:
+                Platform.useSevenZip(args);
+                break;
         }
     }
 }
