@@ -132,9 +132,8 @@ internal class Patching
             ApplyPatch("game.lua", "G.SHADERS['CRT'])", "");
         }
 
-        //Disabled, since this seems to actually be the HARDER way of doing this
-        //I'll leave it in the code base for now though...
-        if (false && AskQuestion("Would you like to apply the accessible saves patch?"))
+        //TODO: Better command line args handling
+        if (Program.ArgsEnableAccessibleSave && AskQuestion("Would you like to apply the external storage patch? (NOT recommended)"))
             ApplyPatch("conf.lua", "t.window.width = 0", "    t.window.width = 0\n    t.externalstorage = true");
     }
 }
