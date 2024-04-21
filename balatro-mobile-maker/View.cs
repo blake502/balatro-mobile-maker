@@ -385,6 +385,16 @@ internal class View
             tryDelete("balatro.zip");
             tryDelete("game.love");
 
+            //extras for Linux
+            //TODO: Fix 7-Zip extraction on Linux
+            tryDelete("License.txt");
+            tryDelete("readme.txt");
+            tryDelete("History.txt");
+            tryDelete("7zzs");
+            tryDelete("7zz");
+            tryDelete("7zz.tar.xz");
+            tryDelete("MANUAL");
+
             tryDelete("platform-tools");
             tryDelete("jdk-21.0.3+9");
             tryDelete("python");
