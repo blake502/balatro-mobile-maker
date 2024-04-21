@@ -171,8 +171,13 @@ internal class View
 
                     //Base APK patch
                     Log("Patching APK folder...");
-                    //TODO: No xcopy
-                    RunCommand("xcopy", "\"Balatro-APK-Patch\\\" \"balatro-apk\\\" /E /H /Y /V");
+                    //This isn't pretty, but I'm planning to change how icons are done at some point. So this is fine for now.
+                    fileCopy("Balatro-APK-Patch/AndroidManifest.xml", "balatro-apk/AndroidManifest.xml");
+                    fileCopy("Balatro-APK-Patch/res/drawable-hdpi/love.png", "balatro-apk/res/drawable-hdpi/love.png");
+                    fileCopy("Balatro-APK-Patch/res/drawable-mdpi/love.png", "balatro-apk/res/drawable-mdpi/love.png");
+                    fileCopy("Balatro-APK-Patch/res/drawable-xhdpi/love.png", "balatro-apk/res/drawable-xhdpi/love.png");
+                    fileCopy("Balatro-APK-Patch/res/drawable-xxhdpi/love.png", "balatro-apk/res/drawable-xxhdpi/love.png");
+                    fileCopy("Balatro-APK-Patch/res/drawable-xxxhdpi/love.png", "balatro-apk/res/drawable-xxxhdpi/love.png");
                     #endregion
                 }
 

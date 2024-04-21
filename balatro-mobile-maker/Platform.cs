@@ -130,7 +130,7 @@ internal class Platform
                 RunCommand("chmod", "+x jdk-21.0.3+9\\bin\\java");
             }
 
-            RunCommand("jdk-21.0.3+9\\bin\\java", args);
+            RunCommand("./jdk-21.0.3+9/bin/java", args);
         }
 
         if (isLinux)
@@ -144,7 +144,7 @@ internal class Platform
                 RunCommand("chmod", "+x jdk-21.0.3+9\\bin\\java");
             }
 
-            RunCommand("jdk-21.0.3+9\\bin\\java", args);
+            RunCommand("./jdk-21.0.3+9/bin/java", args);
         }
     }
 
