@@ -32,6 +32,7 @@ Please review the **Notes** section before you begin.
  - This script will automatically download [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer/)
  - This script will automatically download [love-11.5-android-embed.apk](https://github.com/love2d/love-android/)
  - This script will automatically download [Balatro-APK-Patch](https://github.com/blake502/balatro-mobile-maker/releases/tag/Additional-Tools-1.0)
+ - This script can automatically download [Android Developer Bridge](https://developer.android.com/tools/adb) (optional)
  ### For iOS:
  - This script will automatically download [Python](https://www.python.org/)
  - This script will automatically download [Balatro-IPA-Base](https://github.com/blake502/balatro-mobile-maker/releases/tag/Additional-Tools-1.0)
