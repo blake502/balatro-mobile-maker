@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using static balatro_mobile_maker.View;
+using static balatro_mobile_maker.Tools;
 
 namespace balatro_mobile_maker;
 
@@ -23,7 +23,7 @@ internal class Patching
     {
         //Read the file
         Log("Loading " + file + " file...");
-        string[] loadedFile = File.ReadAllLines("Balatro\\" + file);
+        string[] loadedFile = File.ReadAllLines("Balatro/" + file);
 
         //Search for the line to replace
         bool found = false;
@@ -42,7 +42,7 @@ internal class Patching
         {
             //If it is found, write the file.
             Log("Successfully applied patch...");
-            File.WriteAllLines("Balatro\\" + file, loadedFile);
+            File.WriteAllLines("Balatro/" + file, loadedFile);
         }
         else
             Log("Unable to find patch location...");

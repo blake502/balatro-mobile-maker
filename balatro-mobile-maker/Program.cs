@@ -6,6 +6,7 @@
 /// </summary>
 internal static class Program
 {
+    public static bool _verboseMode;
 
     //TODO: Better command line args handling
     public static bool ArgsEnableAccessibleSave = false;
