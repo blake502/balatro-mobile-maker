@@ -48,9 +48,8 @@ internal class View
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
-                    //TODO: Platform specific file downloads for OpenJDK and 7-Zip
-                    new Thread(() => { TryDownloadFile("OpenJDK", Platform.getOpenJDKDownloadLink(), "openjdk" + Platform.getOpenJDKDownloadExtension()); }),
-                    new Thread(() => { TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe"); }),
+                    new Thread(() => { TryDownloadFile("OpenJDK", Platform.getOpenJDKDownloadLink(), "openjdk"); }),
+                    new Thread(() => { Platform.download7Zip(); }),
 
                     new Thread(() => { TryDownloadFile("APKTool", ApktoolLink, "apktool.jar"); }),
                     new Thread(() => { TryDownloadFile("uber-apk-signer", UberapktoolLink, "uber-apk-signer.jar"); }),
@@ -73,8 +72,8 @@ internal class View
                 //Downloading tools. Handled in threads to allow simultaneous downloads
                 Thread[] downloadThreads =
                 [
-                    //TODO: Platform specific file downloads for Python and 7-Zip
-                    new Thread(() => { TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe"); }),
+                    //TODO: Platform specific file downloads for Python!! This will download the Windows X64 version on all platforms! Moving forward without correcting this assumes Python is installed and in the Path for OSX and Linux!!!
+                    new Thread(() => { Platform.download7Zip(); }),
                     new Thread(() => { TryDownloadFile("Python", PythonWinX64Link, "python.zip"); }),
 
                     new Thread(() => { TryDownloadFile("iOS Base", IosBaseLink, "balatro-base.ipa"); })
@@ -140,11 +139,6 @@ internal class View
                     Log("balatro-apk directory already exists! Deleting balatro-apk directory...");
                     tryDelete("balatro-apk");
                 }
-
-                //TODO: Prep OpenJDK better
-                Log("Preparing OpenJDK...");
-                tryDelete("jdk-21.0.3+9");
-                useTool(ProcessTools.SevenZip, "x openjdk.zip");
 
                 //Unpack Love2D APK
                 useTool(ProcessTools.Java, "-jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
@@ -280,6 +274,8 @@ internal class View
         #endregion
 
         #region Save transfer
+
+        //TODO: TEST with OSX and Linux!!!
         if (!_iosBuild && File.Exists("balatro.apk") && Directory.Exists(Environment.GetEnvironmentVariable("AppData") + "\\Balatro") && AskQuestion("Would you like to transfer saves from your Steam copy of Balatro to your Android device?"))
         {
             Log("Thanks to TheCatRiX for figuring out save transfers!");
@@ -308,7 +304,6 @@ internal class View
 
                 PrepareAndroidPlatformTools();
 
-                //TODO: Platform
                 Log("Backing up your files...");
                 CommandLine("xcopy", "\"%appdata%\\Balatro\\\" \"%appdata%\\BalatroBACKUP\\\" /E /H /Y /V");
                 //CommandLine("rmdir \"%appdata%\\Balatro\\\" /S /Q");
@@ -358,7 +353,7 @@ internal class View
         Exit();
     }
 
-    static void tryDelete(string target)
+    public static void tryDelete(string target)
     {
         if(Directory.Exists(target)) Directory.Delete(target, true);
         if(File.Exists(target)) File.Delete(target);
@@ -402,7 +397,7 @@ internal class View
     /// <param name="name">Friendly name for file (for logging)</param>
     /// <param name="link">Download URL</param>
     /// <param name="fileName">File path to save to</param>
-    private void TryDownloadFile(string name, string link, string fileName)
+    public static void TryDownloadFile(string name, string link, string fileName)
     {
         //If the file does not already exist
         if (!File.Exists(fileName))
@@ -486,8 +481,7 @@ internal class View
             if (!File.Exists("platform-tools.zip"))
                 TryDownloadFile("platform-tools", PlatformToolsLink, "platform-tools.zip");
 
-            //TODO: Platform-specific 
-            TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe");
+            Platform.download7Zip();
 
             Log("Extracting platform-tools...");
             useTool(ProcessTools.SevenZip, "x platform-tools.zip -oplatform-tools");

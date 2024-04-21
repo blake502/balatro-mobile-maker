@@ -26,7 +26,7 @@ internal class Tools
                 Platform.usePython(args);
                 break;
             case ProcessTools.Java:
-                Platform.useJava(args);
+                Platform.useOpenJDK(args);
                 break;
             case ProcessTools.SevenZip:
                 Platform.useSevenZip(args);

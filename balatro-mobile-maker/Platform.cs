@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using static balatro_mobile_maker.View;
+using static balatro_mobile_maker.Tools;
 
 namespace balatro_mobile_maker;
 
@@ -30,6 +31,8 @@ internal class Platform
         if (isWindows)
             CommandLine("platform-tools\\platform-tools\\adb.exe", args);
 
+
+        //TODO: Implement ADB for OSX and Linux
         if (isOSX) { /*...*/ }
 
         if (isLinux) { /*...*/ }
@@ -41,29 +44,106 @@ internal class Platform
         if (isWindows)
             CommandLine("7za.exe", args);
 
-        if (isOSX) { /*...*/ }
-
-        if (isLinux) {
+        //TODO: OSX and Linux implementation is purely speculative! Untested!!!
+        if (isOSX)
+        {
             if (!File.Exists("7zzs"))
-            {
-                //tar -xf filename.tar.gz
-            }
-            else
-            {
-                CommandLine("7zzs", args);
-            }
+                CommandLine("tar", "-xf 7zip.tar.xz");
+
+            CommandLine("7zzs", args);
+        }
+
+        if (isLinux)
+        {
+            if (!File.Exists("7zzs"))
+                CommandLine("tar", "-xf 7zip.tar.xz");
+
+            CommandLine("7zzs", args);
+        }
+    }
+
+    public static void download7Zip()
+    {
+        string link = "";
+        if (isWindows)
+        {
+            if (isX64)
+                link = Constants.SevenzipWinX64Link;
+            if (isX86) //May not be supported, but included for now
+                link = Constants.SevenzipWinX86Link;
+            if (isArm64)
+                link = Constants.SevenzipWinArm64Link;
+
+            TryDownloadFile("7-Zip", link, "7za.exe");
+        }
+
+        //TODO: Test OSX and Linux implementation
+
+        if (isOSX)
+        {
+            link = Constants.SevenzipOSXLink;
+            TryDownloadFile("7-Zip", link, "7zip.tar.xz");
+        }
+
+        if (isLinux)
+        {
+            if (isX64)
+                link = Constants.SevenzipLinuxX64Link;
+            if (isX86) //May not be supported, but included for now
+                link = Constants.SevenzipLinuxX86Link;
+            if (isArm64)
+                link = Constants.SevenzipLinuxArm64Link;
+            if (isArm) //May not be supported, but included for now
+                link = Constants.SevenzipLinuxArmLink;
+
+            TryDownloadFile("7-Zip", link, "7zip.tar.xz");
         }
     }
 
     //Uses Java with args
-    public static void useJava(string args)
+    public static void useOpenJDK(string args)
     {
         if (isWindows)
+        {
+            if (!File.Exists("jdk-21.0.3+9\\bin\\java.exe"))
+            {
+                Log("Preparing OpenJDK...");
+                File.Move("openjdk", "openjdk.zip");
+                tryDelete("jdk-21.0.3+9");
+                useTool(ProcessTools.SevenZip, "x openjdk.zip");
+            }
+
             CommandLine("jdk-21.0.3+9\\bin\\java.exe", args);
+        }
 
-        if (isOSX) { /*...*/ }
+        //TODO: OSX and Linux implementation is purely speculative! Untested!!!
+        if (isOSX)
+        {
+            if (!File.Exists("jdk-21.0.3+9\\bin\\java"))
+            {
+                Log("Preparing OpenJDK...");
+                File.Move("openjdk", "openjdk.tar.gz");
+                tryDelete("jdk-21.0.3+9");
+                CommandLine("tar", "-xf openjdk.tar.gz");
+                CommandLine("chmod", "+x jdk-21.0.3+9\\bin\\java");
+            }
 
-        if (isLinux) { /*...*/ }
+            CommandLine("jdk-21.0.3+9\\bin\\java", args);
+        }
+
+        if (isLinux)
+        {
+            if (!File.Exists("jdk-21.0.3+9\\bin\\java"))
+            {
+                Log("Preparing OpenJDK...");
+                File.Move("openjdk", "openjdk.tar.gz");
+                tryDelete("jdk-21.0.3+9");
+                CommandLine("tar", "-xf openjdk.tar.gz");
+                CommandLine("chmod", "+x jdk-21.0.3+9\\bin\\java");
+            }
+
+            CommandLine("jdk-21.0.3+9\\bin\\java", args);
+        }
     }
 
     //Uses Python with args
@@ -72,9 +152,12 @@ internal class Platform
         if (isWindows)
             CommandLine("python\\python.exe", args);
 
-        if (isOSX) { /*...*/ }
+        //TODO: Don't assume python is already installed and in the system path!!!
+        if (isOSX)
+            CommandLine("python", args);
 
-        if (isLinux) { /*...*/ }
+        if (isLinux)
+            CommandLine("python", args);
     }
     public static string getOpenJDKDownloadLink()
     {
@@ -84,7 +167,7 @@ internal class Platform
                 return Constants.OpenJDKWinX64Link;
             //TODO: uhh something maybe
             //if (isX86)
-            //return Constants.OpenJDKWinX86Link; 
+            //    return Constants.OpenJDKWinX86Link; 
             if (isArm64)
                 return Constants.OpenJDKWinArm64Link;
         }
@@ -109,51 +192,6 @@ internal class Platform
         return "";
     }
 
-    //There's probably a better way to do this, but oh well.
-    public static string getOpenJDKDownloadExtension()
-    {
-        if (isWindows)
-            return ".zip";
-
-        if (isOSX)
-            return ".tar.gz";
-
-        if (isLinux)
-            return ".tar.gz";
-
-        return "";
-    }
-
-    public static string get7ZipDownloadLink()
-    {
-        if (isWindows)
-        {
-            if (isX64)
-                return Constants.SevenzipWinX64Link;
-            if (isX86) //May not be supported, but included for now
-                return Constants.SevenzipWinX86Link;
-            if (isArm64)
-                return Constants.SevenzipWinArm64Link;
-        }
-
-        if (isOSX)
-            return Constants.SevenzipOSXLink;
-
-        if (isLinux)
-        {
-            if (isX64)
-                return Constants.SevenzipLinuxX64Link;
-            if (isX86) //May not be supported, but included for now
-                return Constants.SevenzipLinuxX86Link;
-            if (isArm64)
-                return Constants.SevenzipLinuxArm64Link;
-            if (isArm) //May not be supported, but included for now
-                return Constants.SevenzipLinuxArmLink;
-        }
-
-
-        return "";
-    }
     public static string getPythonDownloadLink()
     {
         if (isWindows)
@@ -166,6 +204,7 @@ internal class Platform
                 return Constants.PythonWinArm64Link;
         }
 
+        //TODO: Download Python!!! At the moment, we're assuming OSX and Linux users already have Python installed, and in their path.
         if (isOSX) { /*...*/ }
 
         if (isLinux) { /*...*/ }
@@ -189,9 +228,19 @@ internal class Platform
         if(isWindows)
             return File.Exists("Balatro.exe");
 
-        if (isOSX) { /*...*/ }
 
-        if (isLinux) { /*...*/ }
+        if (isOSX)
+        {
+            //TODO: Not this!!! But at least this should work??? Depends whether 7-Zip will extract it anyway
+            if (File.Exists("game.love"))
+                File.Copy("game.love", "Balatro.exe");
+
+            if (File.Exists("Balatro.exe"))
+                return true;
+        }
+
+        if (isLinux)
+            return File.Exists("Balatro.exe");
 
         return false;
     }
@@ -204,27 +253,24 @@ internal class Platform
         if (gameExists())
             return true;
 
+        string location = "";
+
         if (isWindows)
-        {
-            //Attempt to copy Balatro.exe from Steam directory
-            Log("Copying Balatro.exe from Steam directory...");
-            File.Copy("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Balatro\\Balatro.exe", "Balatro.exe");
-            //CommandLine("xcopy", "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Balatro\\Balatro.exe\" \"Balatro.exe\" /E /H /Y /V /-I");
-        }
+            location = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Balatro\\Balatro.exe";
 
+        //TODO: Test OSX and Linux locations!!!
         if (isOSX)
-        {
-            //Attempt to copy Balatro game from default location
-
-            //Here-ish maybe?  ~/Library/Application Support/Steam ??? \steamapps\common\Balatro\Balatro.app\Contents\Resources\Balatro.love
-
-            //...
-        }
+            location = "~/Library/Application Support/Steam/steamapps/common/Balatro/Balatro.app/Contents/Resources/Balatro.love";
 
         if (isLinux)
+            location = "~/.steam/steam/steamapps/common/Balatro/Balatro.exe";
+
+
+        //Attempt to copy Balatro from Steam directory
+        if (File.Exists(location))
         {
-            //Attempt to copy Balatro game from default location
-            //...
+            Log("Copying Balatro from Steam directory...");
+            File.Copy(location, "Balatro.exe"); //Note!!! On MacOS, this will rename game.love to balatro.exe! This may or may not work, depending on 7-Zip's willingness to play along.
         }
 
         //Return whether the game exists now after attempting to copy
