@@ -180,7 +180,6 @@ internal class View
                 {
                     #region Prepare IPA
                     Log("Preparing iOS Base...");
-                    tryDelete("balatro-base.zip");
                     fileMove("balatro-base.ipa", "balatro-base.zip");
                     #endregion
                 }
@@ -205,8 +204,6 @@ internal class View
                 }
 
                 Log("Moving archive...");
-                tryDelete("balatro-apk\\assets\\game.love");
-                tryDelete("game.love");
                 if (_androidBuild)
                     fileCopy("balatro.zip", "balatro-apk\\assets\\game.love");
 
@@ -249,6 +246,7 @@ internal class View
                 {
                     #region Packing IPA
                     Log("Extracting Python");
+                    tryDelete("python");
                     useTool(ProcessTools.SevenZip, "x python.zip -opython");
 
                     Log("Repacking iOS app...");
@@ -372,6 +370,8 @@ internal class View
             tryDelete("uber-apk-signer.jar");
             tryDelete("7za.exe");
             tryDelete("openjdk.zip");
+            tryDelete("openjdk.tar.gz");
+            tryDelete("openjdk");
             tryDelete("balatro-aligned-debugSigned.apk.idsig");
             tryDelete("balatro-unsigned.apk");
             tryDelete("platform-tools.zip");
@@ -390,25 +390,6 @@ internal class View
             if (!gameProvided)
                 tryDelete("Balatro.exe");
         }
-    }
-
-    /// <summary>
-    /// Prompt user for a 'Y' or a 'N' (not case-sensitive)
-    /// </summary>
-    /// <param name="question">Prompt for the user</param>
-    /// <returns>Status of prompt - true for 'Y', false for 'N'</returns>
-    public static bool AskQuestion(string question)
-    {
-        string input = null;
-        do
-        {
-            if (input != null)
-                Log("Enter either 'Y' or 'N'!");
-            Log(question + " (y/n):");
-            input = Console.ReadLine()?.ToLower();
-        } while (input != "y" && input != "n");
-
-        return input == "y";
     }
 
     /// <summary>

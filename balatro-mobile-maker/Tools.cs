@@ -200,4 +200,23 @@ internal class Tools
         //Return the process
         return commandLineProcess;
     }
+
+    /// <summary>
+    /// Prompt user for a 'Y' or a 'N' (not case-sensitive)
+    /// </summary>
+    /// <param name="question">Prompt for the user</param>
+    /// <returns>Status of prompt - true for 'Y', false for 'N'</returns>
+    public static bool AskQuestion(string question)
+    {
+        string input = null;
+        do
+        {
+            if (input != null)
+                Log("Enter either 'Y' or 'N'!");
+            Log(question + " (y/n):");
+            input = Console.ReadLine()?.ToLower();
+        } while (input != "y" && input != "n");
+
+        return input == "y";
+    }
 }

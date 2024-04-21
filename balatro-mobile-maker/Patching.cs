@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using static balatro_mobile_maker.View;
+using static balatro_mobile_maker.Tools;
 
 namespace balatro_mobile_maker;
 

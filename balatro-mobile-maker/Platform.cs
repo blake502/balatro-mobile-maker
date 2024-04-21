@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
+//using System.IO;
 using static balatro_mobile_maker.View;
 using static balatro_mobile_maker.Tools;
 
@@ -41,13 +41,15 @@ internal class Platform
     //Uses 7Zip with args
     public static void useSevenZip(string args)
     {
+        args += " -y";//Always assume "Yes" is the answer to all queries
+
         if (isWindows)
             RunCommand("7za.exe", args);
 
         //TODO: OSX and Linux implementation is purely speculative! Untested!!!
         if (isOSX)
         {
-            if (!File.Exists("7zzs"))
+            if (!fileExists("7zzs"))
                 RunCommand("tar", "-xf 7zip.tar.xz");
 
             RunCommand("7zzs", args);
@@ -55,7 +57,7 @@ internal class Platform
 
         if (isLinux)
         {
-            if (!File.Exists("7zzs"))
+            if (!fileExists("7zzs"))
                 RunCommand("tar", "-xf 7zip.tar.xz");
 
             RunCommand("7zzs", args);
@@ -105,10 +107,10 @@ internal class Platform
     {
         if (isWindows)
         {
-            if (!File.Exists("jdk-21.0.3+9\\bin\\java.exe"))
+            if (!fileExists("jdk-21.0.3+9\\bin\\java.exe"))
             {
                 Log("Preparing OpenJDK...");
-                File.Move("openjdk", "openjdk.zip");
+                fileMove("openjdk", "openjdk.zip");
                 tryDelete("jdk-21.0.3+9");
                 useTool(ProcessTools.SevenZip, "x openjdk.zip");
             }
@@ -119,10 +121,10 @@ internal class Platform
         //TODO: OSX and Linux implementation is purely speculative! Untested!!!
         if (isOSX)
         {
-            if (!File.Exists("jdk-21.0.3+9\\bin\\java"))
+            if (!fileExists("jdk-21.0.3+9\\bin\\java"))
             {
                 Log("Preparing OpenJDK...");
-                File.Move("openjdk", "openjdk.tar.gz");
+                fileMove("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
                 RunCommand("tar", "-xf openjdk.tar.gz");
                 RunCommand("chmod", "+x jdk-21.0.3+9\\bin\\java");
@@ -133,10 +135,10 @@ internal class Platform
 
         if (isLinux)
         {
-            if (!File.Exists("jdk-21.0.3+9\\bin\\java"))
+            if (!fileExists("jdk-21.0.3+9\\bin\\java"))
             {
                 Log("Preparing OpenJDK...");
-                File.Move("openjdk", "openjdk.tar.gz");
+                fileMove("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
                 RunCommand("tar", "-xf openjdk.tar.gz");
                 RunCommand("chmod", "+x jdk-21.0.3+9\\bin\\java");
@@ -234,21 +236,21 @@ internal class Platform
     public static bool gameExists()
     {
         if(isWindows)
-            return File.Exists("Balatro.exe");
+            return fileExists("Balatro.exe");
 
 
         if (isOSX)
         {
             //TODO: This isn't great, but it should work
-            if (File.Exists("Balatro.love"))
-                File.Copy("Balatro.love", "Balatro.exe");
+            if (fileExists("Balatro.love"))
+                fileCopy("Balatro.love", "Balatro.exe");
 
-            if (File.Exists("Balatro.exe"))
+            if (fileExists("Balatro.exe"))
                 return true;
         }
 
         if (isLinux)
-            return File.Exists("Balatro.exe");
+            return fileExists("Balatro.exe");
 
         return false;
     }
@@ -275,10 +277,10 @@ internal class Platform
 
 
         //Attempt to copy Balatro from Steam directory
-        if (File.Exists(location))
+        if (fileExists(location))
         {
             Log("Copying Balatro from Steam directory...");
-            File.Copy(location, "Balatro.exe"); //Note!!! On MacOS, this will rename game.love to balatro.exe! This may or may not work, depending on 7-Zip's willingness to play along.
+            fileCopy(location, "Balatro.exe"); //Note!!! On MacOS, this will rename game.love to balatro.exe! This may or may not work, depending on 7-Zip's willingness to play along.
         }
 
         //Return whether the game exists now after attempting to copy
