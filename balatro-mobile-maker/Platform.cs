@@ -121,13 +121,13 @@ internal class Platform
         //TODO: OSX and Linux implementation is purely speculative! Untested!!!
         if (isOSX)
         {
-            if (!fileExists("jdk-21.0.3+9\\bin\\java"))
+            if (!fileExists("jdk-21.0.3+9/bin/java"))
             {
                 Log("Preparing OpenJDK...");
                 fileMove("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
                 RunCommand("tar", "-xf openjdk.tar.gz");
-                RunCommand("chmod", "+x jdk-21.0.3+9\\bin\\java");
+                RunCommand("chmod", "+x jdk-21.0.3+9/bin/java");
             }
 
             RunCommand("./jdk-21.0.3+9/bin/java", args);
@@ -135,13 +135,13 @@ internal class Platform
 
         if (isLinux)
         {
-            if (!fileExists("jdk-21.0.3+9\\bin\\java"))
+            if (!fileExists("jdk-21.0.3+9/bin/java"))
             {
                 Log("Preparing OpenJDK...");
                 fileMove("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
                 RunCommand("tar", "-xf openjdk.tar.gz");
-                RunCommand("chmod", "+x jdk-21.0.3+9\\bin\\java");
+                RunCommand("chmod", "+x jdk-21.0.3+9/bin/java");
             }
 
             RunCommand("./jdk-21.0.3+9/bin/java", args);

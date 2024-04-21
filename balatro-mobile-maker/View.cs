@@ -210,7 +210,7 @@ internal class View
 
                 Log("Moving archive...");
                 if (_androidBuild)
-                    fileCopy("balatro.zip", "balatro-apk\\assets\\game.love");
+                    fileCopy("balatro.zip", "balatro-apk/assets/game.love");
 
                 if (_iosBuild)
                     fileCopy("balatro.zip", "game.love");
@@ -267,7 +267,7 @@ internal class View
             }
         }
 
-        //TODO: TEST with OSX and Linux!!!
+        //TODO: Implement for OSX and Linux!!!
         if ((!_iosBuild || _androidBuild))
         {
             #region Android options
