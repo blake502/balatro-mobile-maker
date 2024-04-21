@@ -29,7 +29,7 @@ internal class Platform
     public static void useADB(string args)
     {
         if (isWindows)
-            CommandLine("platform-tools\\platform-tools\\adb.exe", args);
+            RunCommand("platform-tools\\platform-tools\\adb.exe", args);
 
 
         //TODO: Implement ADB for OSX and Linux
@@ -42,23 +42,23 @@ internal class Platform
     public static void useSevenZip(string args)
     {
         if (isWindows)
-            CommandLine("7za.exe", args);
+            RunCommand("7za.exe", args);
 
         //TODO: OSX and Linux implementation is purely speculative! Untested!!!
         if (isOSX)
         {
             if (!File.Exists("7zzs"))
-                CommandLine("tar", "-xf 7zip.tar.xz");
+                RunCommand("tar", "-xf 7zip.tar.xz");
 
-            CommandLine("7zzs", args);
+            RunCommand("7zzs", args);
         }
 
         if (isLinux)
         {
             if (!File.Exists("7zzs"))
-                CommandLine("tar", "-xf 7zip.tar.xz");
+                RunCommand("tar", "-xf 7zip.tar.xz");
 
-            CommandLine("7zzs", args);
+            RunCommand("7zzs", args);
         }
     }
 
@@ -113,7 +113,7 @@ internal class Platform
                 useTool(ProcessTools.SevenZip, "x openjdk.zip");
             }
 
-            CommandLine("jdk-21.0.3+9\\bin\\java.exe", args);
+            RunCommand("jdk-21.0.3+9\\bin\\java.exe", args);
         }
 
         //TODO: OSX and Linux implementation is purely speculative! Untested!!!
@@ -124,11 +124,11 @@ internal class Platform
                 Log("Preparing OpenJDK...");
                 File.Move("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
-                CommandLine("tar", "-xf openjdk.tar.gz");
-                CommandLine("chmod", "+x jdk-21.0.3+9\\bin\\java");
+                RunCommand("tar", "-xf openjdk.tar.gz");
+                RunCommand("chmod", "+x jdk-21.0.3+9\\bin\\java");
             }
 
-            CommandLine("jdk-21.0.3+9\\bin\\java", args);
+            RunCommand("jdk-21.0.3+9\\bin\\java", args);
         }
 
         if (isLinux)
@@ -138,11 +138,11 @@ internal class Platform
                 Log("Preparing OpenJDK...");
                 File.Move("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
-                CommandLine("tar", "-xf openjdk.tar.gz");
-                CommandLine("chmod", "+x jdk-21.0.3+9\\bin\\java");
+                RunCommand("tar", "-xf openjdk.tar.gz");
+                RunCommand("chmod", "+x jdk-21.0.3+9\\bin\\java");
             }
 
-            CommandLine("jdk-21.0.3+9\\bin\\java", args);
+            RunCommand("jdk-21.0.3+9\\bin\\java", args);
         }
     }
 
@@ -150,14 +150,14 @@ internal class Platform
     public static void usePython(string args)
     {
         if (isWindows)
-            CommandLine("python\\python.exe", args);
+            RunCommand("python\\python.exe", args);
 
         //TODO: Don't assume python is already installed and in the system path!!!
         if (isOSX)
-            CommandLine("python", args);
+            RunCommand("python", args);
 
         if (isLinux)
-            CommandLine("python", args);
+            RunCommand("python", args);
     }
     public static string getOpenJDKDownloadLink()
     {
@@ -217,6 +217,14 @@ internal class Platform
         if (isWindows)
             return Environment.GetEnvironmentVariable("AppData") + "\\Balatro";
 
+        //TODO: Test Linux location
+        if (isLinux)
+            return "~/.local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro";
+
+        //TODO: Implement
+        //if (isOSX)
+        //    return "uhhh";
+
         return ".";
     }
 
@@ -231,9 +239,9 @@ internal class Platform
 
         if (isOSX)
         {
-            //TODO: Not this!!! But at least this should work??? Depends whether 7-Zip will extract it anyway
-            if (File.Exists("game.love"))
-                File.Copy("game.love", "Balatro.exe");
+            //TODO: This isn't great, but it should work
+            if (File.Exists("Balatro.love"))
+                File.Copy("Balatro.love", "Balatro.exe");
 
             if (File.Exists("Balatro.exe"))
                 return true;
@@ -263,7 +271,7 @@ internal class Platform
             location = "~/Library/Application Support/Steam/steamapps/common/Balatro/Balatro.app/Contents/Resources/Balatro.love";
 
         if (isLinux)
-            location = "~/.steam/steam/steamapps/common/Balatro/Balatro.exe";
+            location = "~/.local/share/Steam/steamapps/common/Balatro/Balatro.exe";
 
 
         //Attempt to copy Balatro from Steam directory
