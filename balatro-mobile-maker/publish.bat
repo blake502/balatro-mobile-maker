@@ -1,6 +1,6 @@
 @echo off
 
-set app_version_name=beta-0.7.4
+set app_version_name=beta-0.8
 
 echo Clearing bin, publish, and obj folders.
 rmdir bin /s /q

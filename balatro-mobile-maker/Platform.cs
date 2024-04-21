@@ -14,7 +14,7 @@ namespace balatro_mobile_maker;
 internal class Platform
 {
     //I'm not sure which way will be easier to work with, so I'm doing both.
-    private static bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    public static bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     private static bool isOSX = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
     private static bool isLinux = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
@@ -22,8 +22,6 @@ internal class Platform
     private static bool isX86 = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == Architecture.X86;
     private static bool isArm64 = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == Architecture.Arm64;
     private static bool isArm = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == Architecture.Arm;
-
-    private static Architecture architecture = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture;
 
     //Uses ADB with args
     public static void useADB(string args)

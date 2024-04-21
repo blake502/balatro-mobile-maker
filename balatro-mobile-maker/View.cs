@@ -268,7 +268,7 @@ internal class View
         }
 
         //TODO: Implement for OSX and Linux!!!
-        if ((!_iosBuild || _androidBuild))
+        if ((!_iosBuild || _androidBuild) && Platform.isWindows)
         {
             #region Android options
             #region Auto-install
@@ -420,9 +420,4 @@ internal class View
         while (!AskQuestion("Is your Android device connected to the host with USB Debugging enabled?"))
             Log("Please enable USB Debugging on your Android device, and connect it to the host.");
     }
-
-
-
-
-
 }
