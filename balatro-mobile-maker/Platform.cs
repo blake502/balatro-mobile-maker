@@ -28,7 +28,7 @@ internal class Platform
     public static void useADB(string args)
     {
         if (isWindows)
-            CommandLine("platform-tools\\platform-tools\\adb.exe " + args);
+            CommandLine("platform-tools\\platform-tools\\adb.exe", args);
 
         if (isOSX) { /*...*/ }
 
@@ -39,18 +39,27 @@ internal class Platform
     public static void useSevenZip(string args)
     {
         if (isWindows)
-            CommandLine("7za.exe " + args);
+            CommandLine("7za.exe", args);
 
         if (isOSX) { /*...*/ }
 
-        if (isLinux) { /*...*/ }
+        if (isLinux) {
+            if (!File.Exists("7zzs"))
+            {
+                //tar -xf filename.tar.gz
+            }
+            else
+            {
+                CommandLine("7zzs", args);
+            }
+        }
     }
 
     //Uses Java with args
     public static void useJava(string args)
     {
         if (isWindows)
-            CommandLine("jdk-21.0.3+9\\bin\\java.exe " + args);
+            CommandLine("jdk-21.0.3+9\\bin\\java.exe", args);
 
         if (isOSX) { /*...*/ }
 
@@ -61,7 +70,7 @@ internal class Platform
     public static void usePython(string args)
     {
         if (isWindows)
-            CommandLine("python\\python.exe " + args);
+            CommandLine("python\\python.exe", args);
 
         if (isOSX) { /*...*/ }
 
@@ -75,7 +84,7 @@ internal class Platform
                 return Constants.OpenJDKWinX64Link;
             //TODO: uhh something maybe
             //if (isX86)
-                //return Constants.OpenJDKWinX86Link; 
+            //return Constants.OpenJDKWinX86Link; 
             if (isArm64)
                 return Constants.OpenJDKWinArm64Link;
         }
@@ -96,6 +105,21 @@ internal class Platform
                 return Constants.OpenJDKLinuxArm64Link;
         }
 
+
+        return "";
+    }
+
+    //There's probably a better way to do this, but oh well.
+    public static string getOpenJDKDownloadExtension()
+    {
+        if (isWindows)
+            return ".zip";
+
+        if (isOSX)
+            return ".tar.gz";
+
+        if (isLinux)
+            return ".tar.gz";
 
         return "";
     }
@@ -152,7 +176,7 @@ internal class Platform
     public static string getGameSaveLocation()
     {
         if (isWindows)
-            return "%AppData%/Balatro/";
+            return Environment.GetEnvironmentVariable("AppData") + "\\Balatro";
 
         return ".";
     }
@@ -184,12 +208,16 @@ internal class Platform
         {
             //Attempt to copy Balatro.exe from Steam directory
             Log("Copying Balatro.exe from Steam directory...");
-            CommandLine("xcopy \"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Balatro\\Balatro.exe\" \"Balatro.exe\" /E /H /Y /V /-I");
+            File.Copy("C:\\Program Files (x86)\\Steam\\steamapps\\common\\Balatro\\Balatro.exe", "Balatro.exe");
+            //CommandLine("xcopy", "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Balatro\\Balatro.exe\" \"Balatro.exe\" /E /H /Y /V /-I");
         }
 
         if (isOSX)
         {
             //Attempt to copy Balatro game from default location
+
+            //Here-ish maybe?  ~/Library/Application Support/Steam ??? \steamapps\common\Balatro\Balatro.app\Contents\Resources\Balatro.love
+
             //...
         }
 

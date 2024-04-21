@@ -49,9 +49,8 @@ internal class View
                 Thread[] downloadThreads =
                 [
                     //TODO: Platform specific file downloads for OpenJDK and 7-Zip
-                    new Thread(() => { TryDownloadFile("OpenJDK", Platform.getOpenJDKDownloadLink(), "openjdk.zip"); }),
+                    new Thread(() => { TryDownloadFile("OpenJDK", Platform.getOpenJDKDownloadLink(), "openjdk" + Platform.getOpenJDKDownloadExtension()); }),
                     new Thread(() => { TryDownloadFile("7-Zip", Platform.get7ZipDownloadLink(), "7za.exe"); }),
-
 
                     new Thread(() => { TryDownloadFile("APKTool", ApktoolLink, "apktool.jar"); }),
                     new Thread(() => { TryDownloadFile("uber-apk-signer", UberapktoolLink, "uber-apk-signer.jar"); }),
@@ -117,7 +116,7 @@ internal class View
             {
                 //Delete the Balatro folder if it already exists
                 Log("Balatro directory already exists! Deleting Balatro directory...");
-                CommandLine("rmdir Balatro\\ /S /Q");
+                tryDelete("Balatro");
             }
 
             //Extract Balatro.exe with 7-Zip
@@ -139,12 +138,15 @@ internal class View
                 {
                     //Delete the balatro-apk folder if it already exists
                     Log("balatro-apk directory already exists! Deleting balatro-apk directory...");
-                    CommandLine("rmdir balatro-apk\\ /S /Q");
+                    tryDelete("balatro-apk");
                 }
 
-                //Unpack Love2D APK
-
+                //TODO: Prep OpenJDK better
+                Log("Preparing OpenJDK...");
+                tryDelete("jdk-21.0.3+9");
                 useTool(ProcessTools.SevenZip, "x openjdk.zip");
+
+                //Unpack Love2D APK
                 useTool(ProcessTools.Java, "-jar -Xmx1G -Duser.language=en -Dfile.encoding=UTF8 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -Djdk.nio.zipfs.allowDotZipEntry=true \"apktool.jar\" d -s -o balatro-apk love-11.5-android-embed.apk");
 
                 //Check for failure
@@ -160,7 +162,7 @@ internal class View
                 if (Directory.Exists("Balatro-APK-Patch"))
                 {
                     Log("Balatro-APK-Patch directory already exists! Deleting Balatro-APK-Patch directory...");
-                    CommandLine("rmdir Balatro-APK-Patch\\ /S /Q");
+                    tryDelete("Balatro-APK-Patch");
                 }
 
                 //Extract Balatro-APK-Patch
@@ -174,7 +176,7 @@ internal class View
 
                 //Base APK patch
                 Log("Patching APK folder...");
-                CommandLine("xcopy \"Balatro-APK-Patch\\\" \"balatro-apk\\\" /E /H /Y /V");
+                CommandLine("xcopy",  "\"Balatro-APK-Patch\\\" \"balatro-apk\\\" /E /H /Y /V");
                 #endregion
             }
 
@@ -182,7 +184,7 @@ internal class View
             {
                 #region Prepare IPA
                 Log("Preparing iOS Base...");
-                CommandLine("move balatro-base.ipa balatro-base.zip");
+                File.Move("balatro-base.ipa", "balatro-base.zip");
                 #endregion
             }
 
@@ -200,7 +202,7 @@ internal class View
             //TODO: Figure out how to NOT do this
             //I struggled to pack something other than the working directory
             //I'm probably dumb for this
-            CommandLine("\"cd Balatro && ..\\7za.exe a balatro.zip && cd ..\"");
+            CommandLine("cmd", "/c \"cd Balatro && ..\\7za.exe a balatro.zip && cd ..\"");
 
             if (!File.Exists("Balatro\\balatro.zip"))
             {
@@ -210,10 +212,10 @@ internal class View
 
             Log("Moving archive...");
             if (_androidBuild)
-                CommandLine("move Balatro\\balatro.zip balatro-apk\\assets\\game.love");
+                File.Move("Balatro\\balatro.zip", "balatro-apk\\assets\\game.love");
 
             if (_iosBuild)
-                CommandLine("move Balatro\\balatro.zip game.love");
+                File.Move("Balatro\\balatro.zip", "game.love");
             #endregion
 
             if (_androidBuild)
@@ -240,10 +242,10 @@ internal class View
                 }
 
                 Log("Renaming unsigned apk...");
-                CommandLine("move balatro.apk balatro-unsigned.apk");
+                File.Move("balatro.apk", "balatro-unsigned.apk");
 
                 Log("Renaming signed apk...");
-                CommandLine("move balatro-aligned-debugSigned.apk balatro.apk");
+                File.Move("balatro-aligned-debugSigned.apk", "balatro.apk");
                 #endregion
             }
 
@@ -257,7 +259,7 @@ internal class View
                 File.WriteAllText("ios.py", Constants.PythonScript);
                 useTool(ProcessTools.Python, "ios.py");
 
-                CommandLine("move balatro-base.zip balatro.ipa");
+                File.Move("balatro-base.zip", "balatro.ipa");
                 #endregion
             }
             Log("Build successful!");
@@ -290,7 +292,7 @@ internal class View
             useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/files");
             useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/files/save");
             useTool(ProcessTools.ADB, "shell mkdir /data/local/tmp/balatro/balatro/files/save/game");
-            useTool(ProcessTools.ADB, "push \"" + Platform.getGameSaveLocation() + ".\" /data/local/tmp/balatro/files/save/game");
+            useTool(ProcessTools.ADB, "push \"" + Platform.getGameSaveLocation() + "\\.\" /data/local/tmp/balatro/files/save/game");
             useTool(ProcessTools.ADB, "shell am force-stop com.unofficial.balatro");
             useTool(ProcessTools.ADB, "shell run-as com.unofficial.balatro cp -r /data/local/tmp/balatro/files .");
             useTool(ProcessTools.ADB, "shell rm -r /data/local/tmp/balatro");
@@ -308,9 +310,11 @@ internal class View
 
                 //TODO: Platform
                 Log("Backing up your files...");
-                CommandLine("xcopy \"%appdata%\\Balatro\\\" \"%appdata%\\BalatroBACKUP\\\" /E /H /Y /V");
-                CommandLine("rmdir \"%appdata%\\Balatro\\\" /S /Q");
-                CommandLine("mkdir \"%appdata%\\Balatro\\\"");
+                CommandLine("xcopy", "\"%appdata%\\Balatro\\\" \"%appdata%\\BalatroBACKUP\\\" /E /H /Y /V");
+                //CommandLine("rmdir \"%appdata%\\Balatro\\\" /S /Q");
+                tryDelete(Platform.getGameSaveLocation());
+                //CommandLine("mkdir \"%appdata%\\Balatro\\\"");
+                Directory.CreateDirectory(Platform.getGameSaveLocation());
 
                 Log("Attempting to pull save files from Android device.");
 
@@ -354,34 +358,41 @@ internal class View
         Exit();
     }
 
+    static void tryDelete(string target)
+    {
+        if(Directory.Exists(target)) Directory.Delete(target, true);
+        if(File.Exists(target)) File.Delete(target);
+    }
+
     private static void Cleanup()
     {
         if (_cleaup)
         {
             Log("Deleting temporary files...");
 
-            CommandLine("del love-11.5-android-embed.apk");
-            CommandLine("del Balatro-APK-Patch.zip");//TODO: remove when Android build changes
-            //CommandLine("del AndroidManifest.xml");//TODO: enable when Android build changes
-            CommandLine("del apktool.jar");
-            CommandLine("del uber-apk-signer.jar");
-            CommandLine("del 7za.exe");
-            CommandLine("del openjdk.zip");
-            CommandLine("del balatro-aligned-debugSigned.apk.idsig");
-            CommandLine("del balatro-unsigned.apk");
-            CommandLine("del platform-tools.zip");
-            CommandLine("del python.zip");
-            CommandLine("del ios.py");
-            CommandLine("del game.love");
-            //CommandLine("rmdir icons\\ /S /Q");//TODO: enable when Android build changes
-            CommandLine("rmdir platform-tools\\ /S /Q");
-            CommandLine("rmdir jdk-21.0.3+9\\ /S /Q");
-            CommandLine("rmdir python\\ /S /Q");
-            CommandLine("rmdir Balatro-APK-Patch\\ /S /Q");//TODO: remove when Android build changes
-            CommandLine("rmdir Balatro\\ /S /Q");
-            CommandLine("rmdir balatro-apk\\ /S /Q");
+            tryDelete("love-11.5-android-embed.apk");
+            tryDelete("Balatro-APK-Patch.zip");//TODO: remove when Android build changes
+            //tryDelete("AndroidManifest.xml");//TODO: enable when Android build changes
+            tryDelete("apktool.jar");
+            tryDelete("uber-apk-signer.jar");
+            tryDelete("7za.exe");
+            tryDelete("openjdk.zip");
+            tryDelete("balatro-aligned-debugSigned.apk.idsig");
+            tryDelete("balatro-unsigned.apk");
+            tryDelete("platform-tools.zip");
+            tryDelete("python.zip");
+            tryDelete("ios.py");
+            tryDelete("game.love");
+
+            tryDelete("platform-tools");
+            tryDelete("jdk-21.0.3+9");
+            tryDelete("python");
+            tryDelete("Balatro-APK-Patch");//TODO: remove when Android build changes
+            //tryDelete("icons");//TODO: enable when Android build changes
+            tryDelete("Balatro");
+            tryDelete("balatro-apk");
             if (!gameProvided)
-                CommandLine("del Balatro.exe");
+                tryDelete("Balatro.exe");
         }
     }
 
@@ -494,8 +505,9 @@ internal class View
     /// <param name="e"></param>
     private static void ProcessOutputHandler(object sender, DataReceivedEventArgs e)
     {
-        if (_verboseMode && e.Data != null)
-            Log("    " + e.Data);
+        if (_verboseMode && e.Data != null && e.Data != "")
+            Log("[" + ((System.Diagnostics.Process)sender).ProcessName + "]: " + e.Data);
+        //I'd like to use another color for this text specifically, but I'm not sure if it's possible.
     }
 
 
@@ -505,11 +517,11 @@ internal class View
     /// </summary>
     /// <param name="args">Command to pass to the shell</param>
     /// <returns>Process, post finishing.</returns>
-    public static Process CommandLine(string args)
+    public static Process CommandLine(string command, string args)
     {
         //Create a new cmd process
         Process commandLineProcess = new Process();
-        commandLineProcess.StartInfo.FileName = "cmd.exe";
+        commandLineProcess.StartInfo.FileName = command;
         commandLineProcess.StartInfo.CreateNoWindow = true;
         commandLineProcess.StartInfo.UseShellExecute = false;
 
@@ -520,7 +532,7 @@ internal class View
         commandLineProcess.ErrorDataReceived += ProcessOutputHandler;
 
         //Apply args
-        commandLineProcess.StartInfo.Arguments = "/c " + args;
+        commandLineProcess.StartInfo.Arguments = args;
 
         //Start the process
         commandLineProcess.Start();
