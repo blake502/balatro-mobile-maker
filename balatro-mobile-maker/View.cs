@@ -48,7 +48,7 @@ internal class View
                     #region Android tools
                     //Downloading tools. Handled in threads to allow simultaneous downloads
                     Thread[] downloadThreads =
-                    [
+                    {
                         new Thread(() => { TryDownloadFile("OpenJDK", Platform.getOpenJDKDownloadLink(), "openjdk"); }),
                         new Thread(() => { Platform.download7Zip(); }),
 
@@ -56,7 +56,7 @@ internal class View
                         new Thread(() => { TryDownloadFile("uber-apk-signer", UberapktoolLink, "uber-apk-signer.jar"); }),
                         new Thread(() => { TryDownloadFile("Balatro-APK-Patch", BalatroApkPatchLink, "Balatro-APK-Patch.zip"); }),
                         new Thread(() => { TryDownloadFile("Love2D APK", Love2dApkLink, "love-11.5-android-embed.apk"); })
-                    ];
+                        };
 
                     //Start all the downloads
                     foreach (var t in downloadThreads) t.Start();
@@ -72,13 +72,13 @@ internal class View
                     #region iOS Tools
                     //Downloading tools. Handled in threads to allow simultaneous downloads
                     Thread[] downloadThreads =
-                    [
+                    {
                         //TODO: Platform specific file downloads for Python!! This will download the Windows X64 version on all platforms! Moving forward without correcting this assumes Python is installed and in the Path for OSX and Linux!!!
                         new Thread(() => { Platform.download7Zip(); }),
                         new Thread(() => { TryDownloadFile("Python", PythonWinX64Link, "python.zip"); }),
 
                         new Thread(() => { TryDownloadFile("iOS Base", IosBaseLink, "balatro-base.ipa"); })
-                    ];
+                        };
 
                     //Start all the downloads
                     foreach (var t in downloadThreads) t.Start();
