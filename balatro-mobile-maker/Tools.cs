@@ -147,8 +147,16 @@ internal class Tools
     /// <param name="e"></param>
     private static void ProcessOutputHandler(object sender, DataReceivedEventArgs e)
     {
-        if (_verboseMode && e.Data != null && e.Data != "")
-            Log("[" + ((System.Diagnostics.Process)sender).ProcessName + "]: " + e.Data);
+        string data = e.Data;
+        if (_verboseMode && data != null && data != "")
+            try //I got System.InvalidOperationException here once. Seems to happen if ADB exits fatally
+            {
+                Log("[" + ((System.Diagnostics.Process)sender).ProcessName + "]: " + data);
+            }
+            catch
+            {
+                Log("Error Occurred!");
+            }
         //I'd like to use another color for this text specifically, but I'm not sure if it's possible.
     }
 
