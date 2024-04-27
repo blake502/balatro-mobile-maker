@@ -314,10 +314,10 @@ internal class View
                     PrepareAndroidPlatformTools();
 
                     Log("Backing up your files...");
-                    if (directoryExists(Platform.getGameSaveLocation() + "BACKUP"))
-                        System.IO.Directory.CreateDirectory(Platform.getGameSaveLocation() + "BACKUP");
+                    if (!directoryExists(Platform.getGameSaveLocation() + "BACKUP"))
+                        System.IO.Directory.CreateDirectory(Platform.getGameSaveLocation() + "BACKUP/");
                     //TODO: No xcopy
-                    RunCommand("xcopy", "\"" + Platform.getGameSaveLocation() + "\" \"" + Platform.getGameSaveLocation() + "BACKUP\" /E /H /Y /V");
+                    RunCommand("xcopy", "\"" + Platform.getGameSaveLocation() + "\" \"" + Platform.getGameSaveLocation() + "BACKUP\\\" /E /H /Y /V");
                     tryDelete(Platform.getGameSaveLocation());
                     System.IO.Directory.CreateDirectory(Platform.getGameSaveLocation());
 

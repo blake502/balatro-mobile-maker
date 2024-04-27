@@ -47,10 +47,10 @@ internal class Platform
         //TODO: OSX and Linux implementation is purely speculative! Untested!!!
         if (isOSX)
         {
-            if (!fileExists("7zzs"))
+            if (!fileExists("7zz"))
                 RunCommand("tar", "-xf 7zip.tar.xz");
 
-            RunCommand("7zzs", args);
+            RunCommand("7zz", args);
         }
 
         if (isLinux)
@@ -119,16 +119,16 @@ internal class Platform
         //TODO: OSX and Linux implementation is purely speculative! Untested!!!
         if (isOSX)
         {
-            if (!fileExists("jdk-21.0.3+9/bin/java"))
+            if (!fileExists("jdk-21.0.3+9/Contents/Home/bin/java"))
             {
                 Log("Preparing OpenJDK...");
                 fileMove("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
                 RunCommand("tar", "-xf openjdk.tar.gz");
-                RunCommand("chmod", "+x jdk-21.0.3+9/bin/java");
+                RunCommand("chmod", "+x jdk-21.0.3+9/Contents/Home/bin/java");
             }
 
-            RunCommand("./jdk-21.0.3+9/bin/java", args);
+            RunCommand("./jdk-21.0.3+9/Contents/Home/bin/java", args);
         }
 
         if (isLinux)
