@@ -187,11 +187,11 @@ internal class Platform
 
         //TODO: Test Linux location
         if (isLinux)
-            return "~/.local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro";
+            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile + "/.local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro";
 
         //TODO: Implement
         if (isOSX)
-           return "~/Library/Application Support/Balatro";
+           return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile + "/Library/Application Support/Balatro";
 
         return ".";
     }
