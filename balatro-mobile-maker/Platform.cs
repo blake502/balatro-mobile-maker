@@ -146,19 +146,6 @@ internal class Platform
         }
     }
 
-    //Uses Python with args
-    public static void usePython(string args)
-    {
-        if (isWindows)
-            RunCommand("python\\python.exe", args);
-
-        //TODO: Don't assume python is already installed and in the system path!!!
-        if (isOSX)
-            RunCommand("python", args);
-
-        if (isLinux)
-            RunCommand("python", args);
-    }
     public static string getOpenJDKDownloadLink()
     {
         if (isWindows)
@@ -192,25 +179,6 @@ internal class Platform
         return "";
     }
 
-    public static string getPythonDownloadLink()
-    {
-        if (isWindows)
-        {
-            if (isX64)
-                return Constants.PythonWinX64Link;
-            if (isX86) //May not be supported, but included for now
-                return Constants.PythonWinX86Link;
-            if (isArm64)
-                return Constants.PythonWinArm64Link;
-        }
-
-        //TODO: Download Python!!! At the moment, we're assuming OSX and Linux users already have Python installed, and in their path.
-        if (isOSX) { /*...*/ }
-
-        if (isLinux) { /*...*/ }
-
-        return "";
-    }
 
     public static string getGameSaveLocation()
     {
@@ -222,8 +190,8 @@ internal class Platform
             return "~/.local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro";
 
         //TODO: Implement
-        //if (isOSX)
-        //    return "uhhh";
+        if (isOSX)
+           return "~/Library/Application Support/Balatro";
 
         return ".";
     }

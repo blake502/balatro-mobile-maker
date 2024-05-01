@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using static balatro_mobile_maker.Program;
 using System.Diagnostics;
+using System.IO.Compression;
 
 namespace balatro_mobile_maker;
 internal class Tools
@@ -16,7 +17,6 @@ internal class Tools
         SevenZip,
         ADB,
         Java,
-        Python
     }
 
     public static void useTool(ProcessTools tool, string args)
@@ -25,9 +25,6 @@ internal class Tools
         {
             case ProcessTools.ADB:
                 Platform.useADB(args);
-                break;
-            case ProcessTools.Python:
-                Platform.usePython(args);
                 break;
             case ProcessTools.Java:
                 Platform.useOpenJDK(args);
@@ -226,5 +223,17 @@ internal class Tools
         } while (input != "y" && input != "n");
 
         return input == "y";
+    }
+
+    public static void ModifyZip()
+    {
+        string existingZipFile = "balatro-base.zip";
+        string newFilePath = "game.love";
+        string arcname = "Payload/Balatro.app/game.love";
+
+        using (ZipArchive archive = ZipFile.Open(existingZipFile, ZipArchiveMode.Update))
+        {
+            archive.CreateEntryFromFile(newFilePath, arcname);
+        }
     }
 }
