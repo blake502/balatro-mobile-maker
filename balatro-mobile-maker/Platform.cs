@@ -236,10 +236,10 @@ internal class Platform
 
         //TODO: Test OSX and Linux locations!!!
         if (isOSX)
-            location = "~/Library/Application Support/Steam/steamapps/common/Balatro/Balatro.app/Contents/Resources/Balatro.love";
+            location = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/Library/Application Support/Steam/steamapps/common/Balatro/Balatro.app/Contents/Resources/Balatro.love";
 
         if (isLinux)
-            location = "~/.local/share/Steam/steamapps/common/Balatro/Balatro.exe";
+            location = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.local/share/Steam/steamapps/common/Balatro/Balatro.exe";
 
 
         //Attempt to copy Balatro from Steam directory
