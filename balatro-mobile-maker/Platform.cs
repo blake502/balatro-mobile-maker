@@ -48,17 +48,23 @@ internal class Platform
         if (isOSX)
         {
             if (!fileExists("7zz"))
+            {
                 RunCommand("tar", "-xf 7zip.tar.xz");
+                RunCommand("chmod", "+x 7zz");
+            }
 
-            RunCommand("7zz", args);
+            RunCommand("./7zz", args);
         }
 
         if (isLinux)
         {
             if (!fileExists("7zzs"))
+            {
                 RunCommand("tar", "-xf 7zip.tar.xz");
+                RunCommand("chmod", "+x 7zzs");
+            }
 
-            RunCommand("7zzs", args);
+            RunCommand("./7zzs", args);
         }
     }
 
