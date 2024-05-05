@@ -34,7 +34,6 @@ Please review the **Notes** section before you begin.
  - This script will automatically download [Balatro-APK-Patch](https://github.com/blake502/balatro-mobile-maker/releases/tag/Additional-Tools-1.0)
  - This script can automatically download [Android Developer Bridge](https://developer.android.com/tools/adb) (optional)
  ### For iOS:
- - This script will automatically download [Python](https://www.python.org/)
  - This script will automatically download [Balatro-IPA-Base](https://github.com/blake502/balatro-mobile-maker/releases/tag/Additional-Tools-1.0)
 
  ## Recogition (in no particular order)
@@ -55,4 +54,3 @@ Please review the **Notes** section before you begin.
  - This project uses [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer/blob/main/LICENSE)
  - This project uses [LÖVE](https://github.com/love2d/love/blob/main/license.txt)
  - This project uses [OpenJDK](https://www.microsoft.com/openjdk)
- - This project uses [Python](https://opensource.org/license/python-2-0)
