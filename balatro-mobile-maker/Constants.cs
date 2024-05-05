@@ -44,20 +44,4 @@ internal static class Constants
     public const string SevenzipOSXLink = "https://www.7-zip.org/a/7z2403-mac.tar.xz";
 
 
-    //Python Links
-    //Win (Embedded)
-    public const string PythonWinX64Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-embed-amd64.zip";
-    public const string PythonWinX86Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-embed-win32.zip";
-    public const string PythonWinArm64Link = "https://www.python.org/ftp/python/3.12.3/python-3.12.3-embed-arm64.zip";
-    //TODO: Multiplatform Python
-
-
-    public const string PythonScript = 
-@"import zipfile
-existing_zip = zipfile.ZipFile('balatro-base.zip', 'a')
-new_file_path = 'game.love'
-existing_zip.write(new_file_path, arcname='Payload/Balatro.app/game.love')
-existing_zip.close()";
-
-
 } 

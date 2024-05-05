@@ -73,10 +73,7 @@ internal class View
                     //Downloading tools. Handled in threads to allow simultaneous downloads
                     Thread[] downloadThreads =
                     [
-                        //TODO: Platform specific file downloads for Python!! This will download the Windows X64 version on all platforms! Moving forward without correcting this assumes Python is installed and in the Path for OSX and Linux!!!
                         new Thread(() => { Platform.download7Zip(); }),
-                        new Thread(() => { TryDownloadFile("Python", PythonWinX64Link, "python.zip"); }),
-
                         new Thread(() => { TryDownloadFile("iOS Base", IosBaseLink, "balatro-base.ipa"); })
                     ];
 
@@ -250,14 +247,9 @@ internal class View
                 if (_iosBuild)
                 {
                     #region Packing IPA
-                    Log("Extracting Python");
-                    tryDelete("python");
-                    useTool(ProcessTools.SevenZip, "x python.zip -opython");
-
+                   
                     Log("Repacking iOS app...");
-                    tryDelete("ios.py");
-                    System.IO.File.WriteAllText("ios.py", Constants.PythonScript);
-                    useTool(ProcessTools.Python, "ios.py");
+                    ModifyZip();
 
                     fileMove("balatro-base.zip", "balatro.ipa");
                     #endregion
@@ -382,7 +374,6 @@ internal class View
             tryDelete("balatro-aligned-debugSigned.apk.idsig");
             tryDelete("balatro-unsigned.apk");
             tryDelete("platform-tools.zip");
-            tryDelete("python.zip");
             tryDelete("ios.py");
             tryDelete("balatro.zip");
             tryDelete("game.love");
@@ -399,7 +390,6 @@ internal class View
 
             tryDelete("platform-tools");
             tryDelete("jdk-21.0.3+9");
-            tryDelete("python");
             tryDelete("Balatro-APK-Patch");//TODO: remove when Android build changes
             //tryDelete("icons");//TODO: enable when Android build changes
             tryDelete("Balatro");

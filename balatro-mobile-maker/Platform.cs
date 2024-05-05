@@ -48,17 +48,23 @@ internal class Platform
         if (isOSX)
         {
             if (!fileExists("7zz"))
+            {
                 RunCommand("tar", "-xf 7zip.tar.xz");
+                RunCommand("chmod", "+x 7zz");
+            }
 
-            RunCommand("7zz", args);
+            RunCommand("./7zz", args);
         }
 
         if (isLinux)
         {
             if (!fileExists("7zzs"))
+            {
                 RunCommand("tar", "-xf 7zip.tar.xz");
+                RunCommand("chmod", "+x 7zzs");
+            }
 
-            RunCommand("7zzs", args);
+            RunCommand("./7zzs", args);
         }
     }
 
@@ -146,19 +152,6 @@ internal class Platform
         }
     }
 
-    //Uses Python with args
-    public static void usePython(string args)
-    {
-        if (isWindows)
-            RunCommand("python\\python.exe", args);
-
-        //TODO: Don't assume python is already installed and in the system path!!!
-        if (isOSX)
-            RunCommand("python", args);
-
-        if (isLinux)
-            RunCommand("python", args);
-    }
     public static string getOpenJDKDownloadLink()
     {
         if (isWindows)
@@ -192,25 +185,6 @@ internal class Platform
         return "";
     }
 
-    public static string getPythonDownloadLink()
-    {
-        if (isWindows)
-        {
-            if (isX64)
-                return Constants.PythonWinX64Link;
-            if (isX86) //May not be supported, but included for now
-                return Constants.PythonWinX86Link;
-            if (isArm64)
-                return Constants.PythonWinArm64Link;
-        }
-
-        //TODO: Download Python!!! At the moment, we're assuming OSX and Linux users already have Python installed, and in their path.
-        if (isOSX) { /*...*/ }
-
-        if (isLinux) { /*...*/ }
-
-        return "";
-    }
 
     public static string getGameSaveLocation()
     {
@@ -219,11 +193,11 @@ internal class Platform
 
         //TODO: Test Linux location
         if (isLinux)
-            return "~/.local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro";
+            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.local/share/Steam/steamapps/compatdata/2379780/pfx/drive_c/users/steamuser/AppData/Roaming/Balatro";
 
         //TODO: Implement
-        //if (isOSX)
-        //    return "uhhh";
+        if (isOSX)
+           return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/Library/Application Support/Balatro";
 
         return ".";
     }
@@ -268,10 +242,10 @@ internal class Platform
 
         //TODO: Test OSX and Linux locations!!!
         if (isOSX)
-            location = "~/Library/Application Support/Steam/steamapps/common/Balatro/Balatro.app/Contents/Resources/Balatro.love";
+            location = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/Library/Application Support/Steam/steamapps/common/Balatro/Balatro.app/Contents/Resources/Balatro.love";
 
         if (isLinux)
-            location = "~/.local/share/Steam/steamapps/common/Balatro/Balatro.exe";
+            location = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.local/share/Steam/steamapps/common/Balatro/Balatro.exe";
 
 
         //Attempt to copy Balatro from Steam directory
