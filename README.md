@@ -1,8 +1,8 @@
 # Balatro Mobile Maker
 
-The goal of this project is to allow *Balatro* fans to play *Balatro* on their mobile devices before the official release. This project provides a **NON-PIRACY** avenue for players to do so, by converting their legal *Steam* copy of *Balatro* to a mobile app. Balatro Mobile Maker also supports automatically transferring your saves from your *Steam* copy of the game to your *Android* device.
+The goal of this project is to allow *Balatro* fans to play *Balatro* on their mobile devices before the official release. This project provides a **NON-PIRACY** avenue for players to do so, by converting their legal *Steam* copy of *Balatro* to a mobile app. Balatro Mobile Maker also supports automatically transferring your saves back and forth between your *Steam* copy of the game and your mobile device (save transfer features only available on Windows and Android, for now).
 
-Mods are not officially supported, [but they will probably work if you transfer your saves from a modded system](https://github.com/blake502/balatro-mobile-maker/issues/11).
+Mods are not _officially_ supported, [but they will probably work if you transfer your saves from a modded system](https://github.com/blake502/balatro-mobile-maker/issues/11).
 
 Keep in mind that Balatro Mobile Maker is still in beta! Please report any bugs you encouter in the [issues section](https://github.com/blake502/balatro-mobile-maker/issues). If you encounter bugs with the latest release, try the previous release.
 
@@ -16,6 +16,7 @@ Please review the **Notes** section before you begin.
  - Optionally, allow the program to automatically transfer your saves from your *Steam* copy of *Balatro* using [USB Debugging](https://developer.android.com/studio/debug/dev-options).
  ### For iOS:
  - Sideload **balatro.ipa** using [AltStore](https://altstore.io/)
+ - Optionally, [copy your saves to your iOS device](https://github.com/blake502/balatro-mobile-maker/issues/64#issuecomment-2094660508).
 
  ## Optional Patches
 - **FPS Cap** — Caps FPS to a desired number (Or to the device's native refresh rate-- recommended for battery performance)
@@ -24,7 +25,7 @@ Please review the **Notes** section before you begin.
 - **CRT Shader Disable** — Disables the CRT Shader (Recommended for Pixel and some other devices)
 
 ## Notes
- - This script assumes that **Balatro.exe** is located in the default *Steam* directory (`C:\Program Files (x86)\Steam\steamapps\common\Balatro\Balatro.exe`). If it is not, simply copy your **Balatro.exe** to the same folder as **balatro-mobile-maker.exe**
+ - This script assumes that **Balatro.exe** or **Game.love** is located in the default *Steam* directory. If it is not, simply copy your **Balatro.exe** or **Game.love** to the same folder as **balatro-mobile-maker**
  - This script will automatically download [7-Zip](https://www.7-zip.org/)
  ### For Android:
  - This script will automatically download [OpenJDK](https://www.microsoft.com/openjdk)
@@ -37,11 +38,7 @@ Please review the **Notes** section before you begin.
  - This script will automatically download [Balatro-IPA-Base](https://github.com/blake502/balatro-mobile-maker/releases/tag/Additional-Tools-1.0)
 
  ## Recogition (in no particular order)
- - [PGgamer2](https://github.com/PGgamer2) for many contributions (including language switching and dynamic FPS capping)
- - [TheCatRiX](https://github.com/TheCatRiX) for many contributions (including on-screen keyboard and save transferring)
- - [Sheep975](https://github.com/Sheep975) for kick-starting iOS support
- - [valknight](https://github.com/valknight) for kick-starting cross-platform support
- - [Blake502](https://github.com/Blake502) for initial release and continued support
+ - [Every contributor](https://github.com/blake502/balatro-mobile-maker/graphs/contributors)
  - Developers of [uber-apk-signer](https://github.com/patrickfav/uber-apk-signer)
  - Developers of [LÖVE](https://love2d.org/)
  - Developers of [7-Zip](https://www.7-zip.org/)
