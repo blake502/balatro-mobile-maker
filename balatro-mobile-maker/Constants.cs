@@ -15,6 +15,7 @@ internal static class Constants
 
     //ADB
     public const string PlatformToolsLink = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
+    public const string PlatformToolsLinkOSX = "https://dl.google.com/android/repository/platform-tools-latest-darwin.zip";
 
     //OpenJDK Download Links
     //TODO: Find JDK links for all platforms
@@ -29,7 +30,7 @@ internal static class Constants
     public const string OpenJDKOSXX64Link = "https://aka.ms/download-jdk/microsoft-jdk-21.0.3-macos-x64.tar.gz";
     public const string OpenJDKOSXArm64Link = "https://aka.ms/download-jdk/microsoft-jdk-21.0.3-macos-aarch64.tar.gz";
 
-    
+
     //7-Zip Download links
     //Win
     public const string SevenzipWinX64Link = "https://github.com/blake502/balatro-mobile-maker/releases/download/Additional-Tools-1.1/7za-x64.exe";
@@ -44,4 +45,4 @@ internal static class Constants
     public const string SevenzipOSXLink = "https://www.7-zip.org/a/7z2403-mac.tar.xz";
 
 
-} 
+}

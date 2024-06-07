@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 //using System.IO;
 using static balatro_mobile_maker.View;
 using static balatro_mobile_maker.Tools;
+using System.IO;
 
 namespace balatro_mobile_maker;
 
@@ -15,8 +16,8 @@ internal class Platform
 {
     //I'm not sure which way will be easier to work with, so I'm doing both.
     public static bool isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-    private static bool isOSX = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
-    private static bool isLinux = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+    public static bool isOSX = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+    public static bool isLinux = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
     private static bool isX64 = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == Architecture.X64;
     private static bool isX86 = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == Architecture.X86;
@@ -29,10 +30,10 @@ internal class Platform
         if (isWindows)
             RunCommand("platform-tools\\platform-tools\\adb.exe", args);
 
+        if (isOSX)
+            RunCommand("platform-tools\\platform-tools\\adb", args);
 
-        //TODO: Implement ADB for OSX and Linux
-        if (isOSX) { /*...*/ }
-
+        //TODO: Implement ADB for Linux
         if (isLinux) { /*...*/ }
     }
 
@@ -197,7 +198,7 @@ internal class Platform
 
         //TODO: Implement
         if (isOSX)
-           return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/Library/Application Support/Balatro";
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "Balatro");
 
         return ".";
     }
@@ -207,7 +208,7 @@ internal class Platform
     //If it does already exist, this returns true
     public static bool gameExists()
     {
-        if(isWindows)
+        if (isWindows)
             return fileExists("Balatro.exe");
 
 
