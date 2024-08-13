@@ -109,10 +109,12 @@ internal class Platform
     //Uses Java with args
     public static void useOpenJDK(string args)
     {
-        if (isWindows)
+        //Should work for all I think....
+        if (!Tools.hasJava)
         {
-            if (!Tools.hasJava)
+            if (isWindows)
             {
+
                 if (!fileExists("jdk-21.0.3+9\\bin\\java.exe"))
                 {
                     Log("Preparing OpenJDK...");
@@ -123,10 +125,7 @@ internal class Platform
 
                 RunCommand("jdk-21.0.3+9\\bin\\java.exe", args);
             }
-            else
-            {
-                RunCommand("java", args);
-            }
+
         }
 
         //TODO: OSX and Linux implementation is purely speculative! Untested!!!
@@ -156,6 +155,10 @@ internal class Platform
             }
 
             RunCommand("./jdk-21.0.3+9/bin/java", args);
+        }
+        else
+        {
+            RunCommand("java", args);
         }
     }
 
@@ -204,7 +207,7 @@ internal class Platform
 
         //TODO: Implement
         if (isOSX)
-           return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/Library/Application Support/Balatro";
+            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/Library/Application Support/Balatro";
 
         return ".";
     }
@@ -214,7 +217,7 @@ internal class Platform
     //If it does already exist, this returns true
     public static bool gameExists()
     {
-        if(isWindows)
+        if (isWindows)
             return fileExists("Balatro.exe");
 
 
