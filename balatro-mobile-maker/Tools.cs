@@ -19,6 +19,10 @@ internal class Tools
         Java,
     }
 
+    private static bool _hasJava = false;
+    private static bool _checkHasJava = false;
+    public static bool hasJava {  get { return checkIfJavaIsInstalled(); } }
+
     public static void useTool(ProcessTools tool, string args)
     {
         switch (tool)
@@ -77,6 +81,26 @@ internal class Tools
                 Log("Deleting \"" + target + "\"...");
             File.Delete(target);
         }
+    }
+
+    private static bool checkIfJavaIsInstalled()
+    {
+        if (_checkHasJava)
+        {
+            return _hasJava;
+        }
+        try
+        {
+                Process process = RunCommand("java", "-version");
+                process.Start();
+                process.WaitForExit();
+            _hasJava = (process.ExitCode == 0);
+        }
+        catch (Exception ex)
+        {
+        }
+        _checkHasJava = true;
+        return _hasJava;
     }
 
     /// <summary>
