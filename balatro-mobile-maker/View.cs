@@ -49,7 +49,11 @@ internal class View
                     //Downloading tools. Handled in threads to allow simultaneous downloads
                     Thread[] downloadThreads =
                     [
-                        new Thread(() => { TryDownloadFile("OpenJDK", Platform.getOpenJDKDownloadLink(), "openjdk"); }),
+                        new Thread(() => {
+                            if(!Tools.hasJava){
+                                TryDownloadFile("OpenJDK", Platform.getOpenJDKDownloadLink(), "openjdk");
+                            }
+                        }),
                         new Thread(() => { Platform.download7Zip(); }),
 
                         new Thread(() => { TryDownloadFile("APKTool", ApktoolLink, "apktool.jar"); }),
@@ -394,8 +398,8 @@ internal class View
             //tryDelete("icons");//TODO: enable when Android build changes
             tryDelete("Balatro");
             tryDelete("balatro-apk");
-            if (!gameProvided)
-                tryDelete("Balatro.exe");
+            //if (!gameProvided)
+                //tryDelete("Balatro.exe"); //NO!!
         }
     }
 

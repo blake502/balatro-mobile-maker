@@ -111,15 +111,22 @@ internal class Platform
     {
         if (isWindows)
         {
-            if (!fileExists("jdk-21.0.3+9\\bin\\java.exe"))
+            if (!Tools.hasJava)
             {
-                Log("Preparing OpenJDK...");
-                fileMove("openjdk", "openjdk.zip");
-                tryDelete("jdk-21.0.3+9");
-                useTool(ProcessTools.SevenZip, "x openjdk.zip");
-            }
+                if (!fileExists("jdk-21.0.3+9\\bin\\java.exe"))
+                {
+                    Log("Preparing OpenJDK...");
+                    fileMove("openjdk", "openjdk.zip");
+                    tryDelete("jdk-21.0.3+9");
+                    useTool(ProcessTools.SevenZip, "x openjdk.zip");
+                }
 
-            RunCommand("jdk-21.0.3+9\\bin\\java.exe", args);
+                RunCommand("jdk-21.0.3+9\\bin\\java.exe", args);
+            }
+            else
+            {
+                RunCommand("java", args);
+            }
         }
 
         //TODO: OSX and Linux implementation is purely speculative! Untested!!!
