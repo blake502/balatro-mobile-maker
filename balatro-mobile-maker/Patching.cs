@@ -112,8 +112,7 @@ internal class Patching
             else
             {
                 //Apply the patch using the display refresh rate
-                ApplyPatch("main.lua", "G.FPS_CAP = G.FPS_CAP or", @"        p_ww, p_hh, p_wflags = love.window.getMode()
-        G.FPS_CAP = p_wflags['refreshrate']");
+                ApplyPatch("main.lua", "G.FPS_CAP = G.FPS_CAP or", @"        G.FPS_CAP = G.FPS_CAP or select(3, love.window.getMode())['refreshrate']");
             }
         }
 
