@@ -8,13 +8,15 @@ using System.Net;
 using static balatro_mobile_maker.Program;
 using System.Diagnostics;
 using System.IO.Compression;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace balatro_mobile_maker;
 internal class Tools
 {
+    public static FastZip fastZip = new FastZip();
+
     public enum ProcessTools
     {
-        SevenZip,
         ADB,
         Java,
     }
@@ -28,9 +30,6 @@ internal class Tools
                 break;
             case ProcessTools.Java:
                 Platform.useOpenJDK(args);
-                break;
-            case ProcessTools.SevenZip:
-                Platform.useSevenZip(args);
                 break;
         }
     }
@@ -60,6 +59,16 @@ internal class Tools
     public static bool fileExists(string file)
     {
         return File.Exists(file);
+    }
+
+    public static void extractZip(string file, string directory)
+    {
+        fastZip.ExtractZip(file, directory, null);
+    }
+
+    public static void compressZip(string directory, string file)
+    {
+        fastZip.CreateZip(file, directory, true, null);
     }
 
     public static void tryDelete(string target)
@@ -231,7 +240,7 @@ internal class Tools
         string newFilePath = "game.love";
         string arcname = "Payload/Balatro.app/game.love";
 
-        using (ZipArchive archive = ZipFile.Open(existingZipFile, ZipArchiveMode.Update))
+        using (ZipArchive archive = System.IO.Compression.ZipFile.Open(existingZipFile, ZipArchiveMode.Update))
         {
             archive.CreateEntryFromFile(newFilePath, arcname);
         }

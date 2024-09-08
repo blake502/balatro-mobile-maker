@@ -27,7 +27,7 @@ internal class View
     /// </summary>
     public void Begin()
     {
-        Log("====Balatro APK Maker====\n7-Zip is licensed under the GNU LGPL license. Please visit: www.7-zip.org\n\n");
+        Log("====Balatro APK Maker====\n");
 
         //Initial prompts
         _cleaup = AskQuestion("Would you like to automatically clean up once complete?");
@@ -50,7 +50,6 @@ internal class View
                     Thread[] downloadThreads =
                     [
                         new Thread(() => { TryDownloadFile("OpenJDK", Platform.getOpenJDKDownloadLink(), "openjdk"); }),
-                        new Thread(() => { Platform.download7Zip(); }),
 
                         new Thread(() => { TryDownloadFile("APKTool", ApktoolLink, "apktool.jar"); }),
                         new Thread(() => { TryDownloadFile("uber-apk-signer", UberapktoolLink, "uber-apk-signer.jar"); }),
@@ -73,7 +72,6 @@ internal class View
                     //Downloading tools. Handled in threads to allow simultaneous downloads
                     Thread[] downloadThreads =
                     [
-                        new Thread(() => { Platform.download7Zip(); }),
                         new Thread(() => { TryDownloadFile("iOS Base", IosBaseLink, "balatro-base.ipa"); })
                     ];
 
@@ -116,8 +114,8 @@ internal class View
                     tryDelete("Balatro");
                 }
 
-                //Extract Balatro.exe with 7-Zip
-                useTool(ProcessTools.SevenZip, "x Balatro.exe -oBalatro");
+                //Extract Balatro.exe
+                extractZip("Balatro.exe", "Balatro");
 
                 //Check for failure
                 if (!directoryExists("Balatro"))
@@ -158,7 +156,7 @@ internal class View
                     }
 
                     //Extract Balatro-APK-Patch
-                    useTool(ProcessTools.SevenZip, "x Balatro-APK-Patch.zip -oBalatro-APK-Patch");
+                    extractZip("Balatro-APK-Patch.zip", "Balatro-APK-Patch");
 
                     if (!directoryExists("Balatro-APK-Patch"))
                     {
@@ -197,7 +195,7 @@ internal class View
 
                 #region Balatro.exe -> game.love
                 Log("Packing Balatro folder...");
-                useTool(ProcessTools.SevenZip, "a balatro.zip Balatro/.");
+                compressZip("Balatro/.", "balatro.zip");
 
                 if (!fileExists("balatro.zip"))
                 {
@@ -367,7 +365,6 @@ internal class View
             //tryDelete("AndroidManifest.xml");//TODO: enable when Android build changes
             tryDelete("apktool.jar");
             tryDelete("uber-apk-signer.jar");
-            tryDelete("7za.exe");
             tryDelete("openjdk.zip");
             tryDelete("openjdk.tar.gz");
             tryDelete("openjdk");
@@ -377,16 +374,6 @@ internal class View
             tryDelete("ios.py");
             tryDelete("balatro.zip");
             tryDelete("game.love");
-
-            //extras for Linux
-            //TODO: Fix 7-Zip extraction on Linux
-            tryDelete("License.txt");
-            tryDelete("readme.txt");
-            tryDelete("History.txt");
-            tryDelete("7zzs");
-            tryDelete("7zz");
-            tryDelete("7zz.tar.xz");
-            tryDelete("MANUAL");
 
             tryDelete("platform-tools");
             tryDelete("jdk-21.0.3+9");
@@ -412,10 +399,8 @@ internal class View
             if (!fileExists("platform-tools.zip"))
                 TryDownloadFile("platform-tools", PlatformToolsLink, "platform-tools.zip");
 
-            Platform.download7Zip();
-
             Log("Extracting platform-tools...");
-            useTool(ProcessTools.SevenZip, "x platform-tools.zip -oplatform-tools");
+            extractZip("platform-tools.zip", "platform-tools");
         }
 
         //Prompt user
