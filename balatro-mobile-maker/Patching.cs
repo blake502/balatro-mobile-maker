@@ -60,8 +60,10 @@ internal class Patching
         //Android platform support
         ApplyPatch("globals.lua", "loadstring", @"    -- Removed 'loadstring' line which generated lua code that exited upon starting on mobile
     if love.system.getOS() == 'Android' or love.system.getOS() == 'iOS' then
+        self.F_SAVE_TIMER = 5
         self.F_DISCORD = true
         self.F_NO_ACHIEVEMENTS = true
+        self.F_CRASH_REPORTS = false
         self.F_SOUND_THREAD = true
         self.F_VIDEO_SETTINGS = false
         self.F_ENGLISH_ONLY = false
