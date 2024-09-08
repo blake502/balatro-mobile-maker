@@ -73,8 +73,7 @@ internal class Patching
         ApplyPatch("functions/button_callbacks.lua", "G.CONTROLLER.text_input_hook == e and G.CONTROLLER.HID.controller", "  if G.CONTROLLER.text_input_hook == e and (G.CONTROLLER.HID.controller or G.CONTROLLER.HID.touch) then");
 
         // Flame fix patch
-        ApplyPatch("resources/shaders/flame.fs", "#define MY_HIGHP_OR_MEDIUMP highp", "\t#define MY_HIGHP_OR_MEDIUMP highp\n\tprecision highp float;");
-        ApplyPatch("resources/shaders/flame.fs", "#define MY_HIGHP_OR_MEDIUMP mediump", "\t#define MY_HIGHP_OR_MEDIUMP mediump\n\tprecision mediump float;");
+        ApplyPatch("resources/shaders/flame.fs", "#endif", "#endif\n#ifdef GL_ES\n\tprecision MY_HIGHP_OR_MEDIUMP float;\n#endif");
         ApplyPatch("resources/shaders/flame.fs", "vec4 effect( vec4 colour, Image texture, vec2 texture_coords, vec2 screen_coords )", "mediump vec4 effect( mediump vec4 colour, Image texture, mediump vec2 texture_coords, mediump vec2 screen_coords )");
 
         //Ask whether they want the FPS cap patch
