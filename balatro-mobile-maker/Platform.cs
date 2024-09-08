@@ -61,7 +61,7 @@ internal class Platform
                 fileMove("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
                 RunCommand("tar", "-xf openjdk.tar.gz");
-                RunCommand("chmod", "+x jdk-21.0.3+9/Contents/Home/bin/java");
+                RunCommand("chmod", "-R +x jdk-21.0.3+9");
             }
 
             RunCommand("./jdk-21.0.3+9/Contents/Home/bin/java", args);
@@ -75,7 +75,7 @@ internal class Platform
                 fileMove("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
                 RunCommand("tar", "-xf openjdk.tar.gz");
-                RunCommand("chmod", "+x jdk-21.0.3+9/bin/java");
+                RunCommand("chmod", "-R +x jdk-21.0.3+9");
             }
 
             RunCommand("./jdk-21.0.3+9/bin/java", args);
