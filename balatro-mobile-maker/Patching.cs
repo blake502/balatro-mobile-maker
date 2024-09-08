@@ -118,12 +118,17 @@ internal class Patching
 
         //Extra patches
 
-        if (AskQuestion("Would you like to apply the landscape orientation patch (required for high DPI)?"))
+        if (AskQuestion("Would you like to apply the landscape orientation patch?"))
         {
-            // Asking ReSharper to disable naming here, as, DPI (all-caps) is correct, not Dpi
-            // ReSharper disable once InconsistentNaming
-            var highDPI = AskQuestion("Would you like to apply the high DPI patch (recommended for devices with high resolution)?");
-            ApplyPatch("main.lua", "local os = love.system.getOS()", "    local os = love.system.getOS()\n    love.window.setMode(2, 1" + (highDPI ? ", {highdpi = true}" : "") + ")");
+            ApplyPatch("functions/button_callbacks.lua", "resizable = true,", "    resizable = not (love.system.getOS() == 'Android' or love.system.getOS() == 'iOS'),");
+        }
+
+        // Asking ReSharper to disable naming here, as, DPI (all-caps) is correct, not Dpi
+        // ReSharper disable once InconsistentNaming
+        if (AskQuestion("Would you like to apply the high DPI patch (recommended for devices with high resolution)?"))
+        {
+            ApplyPatch("conf.lua", "t.window.width = 0", "    t.window.width = 0\n    t.window.usedpiscale = false");
+            ApplyPatch("functions/button_callbacks.lua", "highdpi = (love.system.getOS() == 'OS X')", "    highdpi = (love.system.getOS() == 'OS X' or love.system.getOS() == 'Android' or love.system.getOS() == 'iOS')");
         }
 
         if (AskQuestion("Would you like to apply the CRT shader disable patch? (Required for Pixel and some other devices!)"))
