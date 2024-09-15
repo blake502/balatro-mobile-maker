@@ -60,8 +60,10 @@ internal class Patching
         //Android platform support
         ApplyPatch("globals.lua", "loadstring", @"    -- Removed 'loadstring' line which generated lua code that exited upon starting on mobile
     if love.system.getOS() == 'Android' or love.system.getOS() == 'iOS' then
+        self.F_SAVE_TIMER = 5
         self.F_DISCORD = true
         self.F_NO_ACHIEVEMENTS = true
+        self.F_CRASH_REPORTS = false
         self.F_SOUND_THREAD = true
         self.F_VIDEO_SETTINGS = false
         self.F_ENGLISH_ONLY = false
@@ -71,8 +73,7 @@ internal class Patching
         ApplyPatch("functions/button_callbacks.lua", "G.CONTROLLER.text_input_hook == e and G.CONTROLLER.HID.controller", "  if G.CONTROLLER.text_input_hook == e and (G.CONTROLLER.HID.controller or G.CONTROLLER.HID.touch) then");
 
         // Flame fix patch
-        ApplyPatch("resources/shaders/flame.fs", "#define MY_HIGHP_OR_MEDIUMP highp", "\t#define MY_HIGHP_OR_MEDIUMP highp\n\tprecision highp float;");
-        ApplyPatch("resources/shaders/flame.fs", "#define MY_HIGHP_OR_MEDIUMP mediump", "\t#define MY_HIGHP_OR_MEDIUMP mediump\n\tprecision mediump float;");
+        ApplyPatch("resources/shaders/flame.fs", "#endif", "#endif\n#ifdef GL_ES\n\tprecision MY_HIGHP_OR_MEDIUMP float;\n#endif");
         ApplyPatch("resources/shaders/flame.fs", "vec4 effect( vec4 colour, Image texture, vec2 texture_coords, vec2 screen_coords )", "mediump vec4 effect( mediump vec4 colour, Image texture, mediump vec2 texture_coords, mediump vec2 screen_coords )");
 
         // CRT fix patch
@@ -114,19 +115,23 @@ internal class Patching
             else
             {
                 //Apply the patch using the display refresh rate
-                ApplyPatch("main.lua", "G.FPS_CAP = G.FPS_CAP or", @"        p_ww, p_hh, p_wflags = love.window.getMode()
-        G.FPS_CAP = p_wflags['refreshrate']");
+                ApplyPatch("main.lua", "G.FPS_CAP = G.FPS_CAP or", @"        G.FPS_CAP = G.FPS_CAP or select(3, love.window.getMode())['refreshrate']");
             }
         }
 
         //Extra patches
 
-        if (AskQuestion("Would you like to apply the landscape orientation patch (required for high DPI)?"))
+        if (AskQuestion("Would you like to apply the landscape orientation patch?"))
         {
-            // Asking ReSharper to disable naming here, as, DPI (all-caps) is correct, not Dpi
-            // ReSharper disable once InconsistentNaming
-            var highDPI = AskQuestion("Would you like to apply the high DPI patch (recommended for devices with high resolution)?");
-            ApplyPatch("main.lua", "local os = love.system.getOS()", "    local os = love.system.getOS()\n    love.window.setMode(2, 1" + (highDPI ? ", {highdpi = true}" : "") + ")");
+            ApplyPatch("functions/button_callbacks.lua", "resizable = true,", "    resizable = not (love.system.getOS() == 'Android' or love.system.getOS() == 'iOS'),");
+        }
+
+        // Asking ReSharper to disable naming here, as, DPI (all-caps) is correct, not Dpi
+        // ReSharper disable once InconsistentNaming
+        if (AskQuestion("Would you like to apply the high DPI patch (recommended for devices with high resolution)?"))
+        {
+            ApplyPatch("conf.lua", "t.window.width = 0", "    t.window.width = 0\n    t.window.usedpiscale = false");
+            ApplyPatch("functions/button_callbacks.lua", "highdpi = (love.system.getOS() == 'OS X')", "    highdpi = (love.system.getOS() == 'OS X' or love.system.getOS() == 'Android' or love.system.getOS() == 'iOS')");
         }
 
         if (AskQuestion("Would you like to apply the CRT shader disable patch? (Required for Pixel and some other devices!)"))

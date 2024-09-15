@@ -5,4 +5,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <RootNamespace>balatro_mobile_maker</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
+  </ItemGroup>
 </Project>

@@ -36,76 +36,6 @@ internal class Platform
         if (isLinux) { /*...*/ }
     }
 
-    //Uses 7Zip with args
-    public static void useSevenZip(string args)
-    {
-        args += " -y";//Always assume "Yes" is the answer to all queries
-
-        if (isWindows)
-            RunCommand("7za.exe", args);
-
-        //TODO: OSX and Linux implementation is purely speculative! Untested!!!
-        if (isOSX)
-        {
-            if (!fileExists("7zz"))
-            {
-                RunCommand("tar", "-xf 7zip.tar.xz");
-                RunCommand("chmod", "+x 7zz");
-            }
-
-            RunCommand("./7zz", args);
-        }
-
-        if (isLinux)
-        {
-            if (!fileExists("7zzs"))
-            {
-                RunCommand("tar", "-xf 7zip.tar.xz");
-                RunCommand("chmod", "+x 7zzs");
-            }
-
-            RunCommand("./7zzs", args);
-        }
-    }
-
-    public static void download7Zip()
-    {
-        string link = "";
-        if (isWindows)
-        {
-            if (isX64)
-                link = Constants.SevenzipWinX64Link;
-            if (isX86) //May not be supported, but included for now
-                link = Constants.SevenzipWinX86Link;
-            if (isArm64)
-                link = Constants.SevenzipWinArm64Link;
-
-            TryDownloadFile("7-Zip", link, "7za.exe");
-        }
-
-        //TODO: Test OSX and Linux implementation
-
-        if (isOSX)
-        {
-            link = Constants.SevenzipOSXLink;
-            TryDownloadFile("7-Zip", link, "7zip.tar.xz");
-        }
-
-        if (isLinux)
-        {
-            if (isX64)
-                link = Constants.SevenzipLinuxX64Link;
-            if (isX86) //May not be supported, but included for now
-                link = Constants.SevenzipLinuxX86Link;
-            if (isArm64)
-                link = Constants.SevenzipLinuxArm64Link;
-            if (isArm) //May not be supported, but included for now
-                link = Constants.SevenzipLinuxArmLink;
-
-            TryDownloadFile("7-Zip", link, "7zip.tar.xz");
-        }
-    }
-
     //Uses Java with args
     public static void useOpenJDK(string args)
     {
@@ -116,7 +46,7 @@ internal class Platform
                 Log("Preparing OpenJDK...");
                 fileMove("openjdk", "openjdk.zip");
                 tryDelete("jdk-21.0.3+9");
-                useTool(ProcessTools.SevenZip, "x openjdk.zip");
+                extractZip("openjdk.zip", ".");
             }
 
             RunCommand("jdk-21.0.3+9\\bin\\java.exe", args);
@@ -131,7 +61,7 @@ internal class Platform
                 fileMove("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
                 RunCommand("tar", "-xf openjdk.tar.gz");
-                RunCommand("chmod", "+x jdk-21.0.3+9/Contents/Home/bin/java");
+                RunCommand("chmod", "-R +x jdk-21.0.3+9");
             }
 
             RunCommand("./jdk-21.0.3+9/Contents/Home/bin/java", args);
@@ -145,7 +75,7 @@ internal class Platform
                 fileMove("openjdk", "openjdk.tar.gz");
                 tryDelete("jdk-21.0.3+9");
                 RunCommand("tar", "-xf openjdk.tar.gz");
-                RunCommand("chmod", "+x jdk-21.0.3+9/bin/java");
+                RunCommand("chmod", "-R +x jdk-21.0.3+9");
             }
 
             RunCommand("./jdk-21.0.3+9/bin/java", args);
@@ -252,7 +182,7 @@ internal class Platform
         if (fileExists(location))
         {
             Log("Copying Balatro from Steam directory...");
-            fileCopy(location, "Balatro.exe"); //Note!!! On MacOS, this will rename game.love to balatro.exe! This may or may not work, depending on 7-Zip's willingness to play along.
+            fileCopy(location, "Balatro.exe");
         }
 
         //Return whether the game exists now after attempting to copy
