@@ -76,6 +76,9 @@ internal class Patching
         ApplyPatch("resources/shaders/flame.fs", "#endif", "#endif\n#ifdef GL_ES\n\tprecision MY_HIGHP_OR_MEDIUMP float;\n#endif");
         ApplyPatch("resources/shaders/flame.fs", "vec4 effect( vec4 colour, Image texture, vec2 texture_coords, vec2 screen_coords )", "mediump vec4 effect( mediump vec4 colour, Image texture, mediump vec2 texture_coords, mediump vec2 screen_coords )");
 
+        // CRT fix patch
+        ApplyPatch("resources/shaders/CRT.fs", "MY_HIGHP_OR_MEDIUMP float mid_dist = screen_scale * length(vertex_position.xy / screen_scale - 0.5 * love_ScreenSize.xy) / length(love_ScreenSize.xy);", "\tMY_HIGHP_OR_MEDIUMP float mid_dist = length(vertex_position.xy - 0.5*love_ScreenSize.xy)/length(love_ScreenSize.xy);");
+
         //Ask whether they want the FPS cap patch
         if (AskQuestion("Would you like to apply the FPS cap patch?"))
         {
