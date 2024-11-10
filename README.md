@@ -1,6 +1,6 @@
 # Balatro Mobile Maker
 
-The goal of this project is to allow *Balatro* fans to play *Balatro* on their mobile devices before the official release. This project provides a **NON-PIRACY** avenue for players to do so, by converting their legal *Steam* copy of *Balatro* to a mobile app. Balatro Mobile Maker also supports automatically transferring your saves back and forth between your *Steam* copy of the game and your mobile device (save transfer features only available on Windows and Android, for now).
+The goal of this project is to allow *Balatro* fans to play *Balatro* on their mobile devices. This project provides a **NON-PIRACY** avenue for players to do so, by converting their *Steam* copy of *Balatro* to a mobile app. Balatro Mobile Maker also supports automatically transferring your saves back and forth between your *Steam* copy of the game and your mobile device (save transfer features only officially available on Windows and Android, for now).
 
 Mods are not _officially_ supported, [but they will probably work if you transfer your saves from a modded system](https://github.com/blake502/balatro-mobile-maker/issues/11).
 
